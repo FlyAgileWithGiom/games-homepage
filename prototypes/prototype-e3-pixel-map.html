@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fly Agile Games - World Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ice-primary: #5bcefa;
+    --ice-secondary: #a8e6ff;
+    --ice-dark: #2a6f97;
+    --fire-primary: #ff6b35;
+    --fire-secondary: #ffd166;
+    --fire-dark: #9e2a0f;
+    --magic-primary: #9b5de5;
+    --magic-secondary: #44cf6c;
+    --magic-dark: #3a1d6e;
+    --ground: #6b8e4e;
+    --ground-dark: #4a6b35;
+    --path-color: #d4a574;
+    --water: #3a86b0;
+  }
+
+  body {
+    font-family: 'Silkscreen', monospace;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    image-rendering: pixelated;
+  }
+
+  /* ===== BANNER ===== */
+  .banner {
+    text-align: center;
+    padding: 18px 16px 10px;
+    background: linear-gradient(180deg, #2a1a4e 0%, #1a1a2e 100%);
+    border-bottom: 4px solid #4a3a6e;
+    position: relative;
+    z-index: 10;
+  }
+  .banner h1 {
+    font-size: clamp(16px, 4vw, 28px);
+    letter-spacing: 4px;
+    color: #ffd166;
+    text-shadow: 2px 2px 0 #9e2a0f, 0 0 12px rgba(255, 209, 102, 0.4);
+    text-transform: uppercase;
+  }
+  .banner .subtitle {
+    font-size: clamp(9px, 2vw, 13px);
+    color: #a0a0c0;
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* ===== MAP CONTAINER ===== */
+  .map-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 90px);
+    padding: 20px;
+  }
+  .map-container {
+    position: relative;
+    width: 900px;
+    height: 640px;
+    max-width: 100%;
+    background: var(--ground);
+    border: 4px solid #3a2a1e;
+    box-shadow: 0 0 0 4px #1a1a2e, 0 0 40px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+
+  /* ===== GRASS TEXTURE (canvas-drawn) ===== */
+  .map-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 7px, rgba(0,0,0,0.04) 7px, rgba(0,0,0,0.04) 8px),
+      repeating-linear-gradient(90deg, transparent, transparent 7px, rgba(0,0,0,0.04) 7px, rgba(0,0,0,0.04) 8px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ===== PIXEL PATH ===== */
+  .path-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ===== WATER EDGES ===== */
+  .water {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .water-bottom {
+    bottom: 0; left: 0; right: 0;
+    height: 50px;
+    background: linear-gradient(0deg, var(--water) 0%, rgba(58,134,176,0.3) 70%, transparent 100%);
+  }
+  .water-right {
+    top: 0; right: 0; bottom: 0;
+    width: 40px;
+    background: linear-gradient(270deg, var(--water) 0%, rgba(58,134,176,0.3) 70%, transparent 100%);
+  }
+  .water-ripple {
+    position: absolute;
+    width: 16px; height: 4px;
+    background: rgba(160,220,255,0.5);
+    border-radius: 2px;
+    animation: ripple 3s ease-in-out infinite;
+  }
+  @keyframes ripple {
+    0%, 100% { opacity: 0.3; transform: scaleX(1); }
+    50% { opacity: 0.8; transform: scaleX(1.6); }
+  }
+
+  /* ===== ZONES ===== */
+  .zone {
+    position: absolute;
+    width: 220px; height: 220px;
+    z-index: 3;
+    cursor: pointer;
+    transition: filter 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .zone:hover { filter: brightness(1.25); }
+  .zone:hover .zone-flag { opacity: 1; transform: translateY(-4px); }
+
+  .zone-terrain {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .zone-label {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    text-align: center;
+    z-index: 5;
+  }
+  .zone-label .name {
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    letter-spacing: 1px;
+  }
+  .zone-label .status {
+    font-size: 9px;
+    margin-top: 2px;
+    letter-spacing: 1px;
+  }
+  .status-live { color: #44cf6c; }
+  .status-soon { color: #ffd166; }
+
+  .zone-flag {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 20px; height: 28px;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  /* ===== ICE ZONE ===== */
+  .zone-ice { top: 60px; left: 40px; }
+  .zone-ice .zone-terrain {
+    background: linear-gradient(135deg, #d0eaff 0%, #a8e6ff 30%, #e8f4ff 50%, #b0d8f0 80%, #80c4e0 100%);
+  }
+  .zone-ice .name { color: var(--ice-secondary); }
+
+  .ice-crystal {
+    position: absolute;
+    background: rgba(200,230,255,0.9);
+    clip-path: polygon(50% 0%, 80% 30%, 100% 50%, 80% 70%, 50% 100%, 20% 70%, 0% 50%, 20% 30%);
+  }
+  .snow-patch {
+    position: absolute;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+  }
+  .snowflake {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: white;
+    opacity: 0;
+    animation: snowfall linear infinite;
+  }
+  @keyframes snowfall {
+    0% { opacity: 0; transform: translateY(-20px) translateX(0); }
+    10% { opacity: 0.9; }
+    90% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(220px) translateX(20px); }
+  }
+
+  /* ===== FIRE ZONE ===== */
+  .zone-fire { top: 80px; right: 80px; }
+  .zone-fire .zone-terrain {
+    background: linear-gradient(135deg, #d4845a 0%, #c0703a 30%, #e09060 50%, #a85830 80%, #8b4020 100%);
+  }
+  .zone-fire .name { color: var(--fire-secondary); }
+
+  .pixel-flame {
+    position: absolute;
+    bottom: 0;
+    animation: flicker 0.4s steps(2) infinite alternate;
+  }
+  .pixel-flame .f1 { width: 8px; height: 8px; background: #ff6b35; position: absolute; }
+  .pixel-flame .f2 { width: 8px; height: 8px; background: #ffd166; position: absolute; }
+  .pixel-flame .f3 { width: 8px; height: 8px; background: #fff3b0; position: absolute; }
+  @keyframes flicker {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-2px); }
+  }
+
+  .garden-patch {
+    position: absolute;
+    background: #5a8e2e;
+    border: 2px solid #3a6e18;
+    border-radius: 2px;
+  }
+  .garden-row {
+    position: absolute;
+    width: 100%; height: 4px;
+    background: repeating-linear-gradient(90deg, #6aae3e 0px, #6aae3e 4px, transparent 4px, transparent 8px);
+  }
+
+  .steam-particle {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    animation: steam 2.5s ease-out infinite;
+  }
+  @keyframes steam {
+    0% { opacity: 0.6; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-60px) scale(2.5); }
+  }
+
+  /* ===== MAGIC ZONE ===== */
+  .zone-magic { bottom: 80px; left: 50%; transform: translateX(-50%); }
+  .zone-magic .zone-terrain {
+    background: linear-gradient(135deg, #2a1a4e 0%, #3a2a5e 30%, #1e3a2e 50%, #2a4a3e 80%, #1a2a1e 100%);
+  }
+  .zone-magic .name { color: var(--magic-primary); }
+
+  .pixel-tree {
+    position: absolute;
+    pointer-events: none;
+  }
+  .tree-trunk { background: #5a3a1e; position: absolute; }
+  .tree-top { background: #2a6e3e; position: absolute; }
+
+  .mushroom {
+    position: absolute;
+    pointer-events: none;
+  }
+  .mush-cap { position: absolute; border-radius: 50% 50% 0 0; }
+  .mush-stem { position: absolute; background: #e0d8c0; }
+
+  .magic-sparkle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: #e0b0ff;
+    animation: sparkle 2s ease-in-out infinite;
+  }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  .question-mark {
+    position: absolute;
+    font-size: 14px;
+    color: #ffd166;
+    animation: floatQ 3s ease-in-out infinite;
+    text-shadow: 1px 1px 0 #000;
+  }
+  @keyframes floatQ {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ===== FOG OF WAR ===== */
+  .fog-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: 12px;
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .zone-magic:hover .fog-layer { opacity: 0.45; }
+
+  .fog-cloud {
+    position: absolute;
+    background: radial-gradient(ellipse, rgba(30,20,50,0.95) 0%, rgba(30,20,50,0.6) 40%, transparent 70%);
+    border-radius: 50%;
+    animation: fogDrift 8s ease-in-out infinite alternate;
+  }
+  @keyframes fogDrift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(10px, -5px) scale(1.1); }
+  }
+
+  /* ===== COMPASS ROSE ===== */
+  .compass {
+    position: absolute;
+    bottom: 60px; right: 50px;
+    width: 60px; height: 60px;
+    z-index: 6;
+    pointer-events: none;
+  }
+  .compass-body {
+    position: relative;
+    width: 100%; height: 100%;
+  }
+  .compass-point {
+    position: absolute;
+    font-size: 10px;
+    color: #d4a574;
+    text-shadow: 1px 1px 0 #000;
+    font-weight: 700;
+  }
+  .cp-n { top: 0; left: 50%; transform: translateX(-50%); color: #ff6b35; }
+  .cp-s { bottom: 0; left: 50%; transform: translateX(-50%); }
+  .cp-e { right: 0; top: 50%; transform: translateY(-50%); }
+  .cp-w { left: 0; top: 50%; transform: translateY(-50%); }
+  .compass-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; height: 8px;
+    background: #d4a574;
+    border: 2px solid #ffd166;
+    transform-origin: center;
+  }
+  .compass-needle {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 2px;
+    background: #d4a574;
+  }
+  .needle-v { height: 40px; transform: translate(-50%, -50%); }
+  .needle-h { height: 30px; transform: translate(-50%, -50%) rotate(90deg); }
+  .compass-diamond {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 16px; height: 16px;
+    transform: translate(-50%, -50%) rotate(45deg);
+    border: 2px solid #d4a574;
+    opacity: 0.4;
+  }
+
+  /* ===== LEGEND ===== */
+  .legend {
+    position: absolute;
+    top: 12px; right: 12px;
+    z-index: 7;
+    font-size: 9px;
+    color: #d4a574;
+    background: rgba(0,0,0,0.4);
+    padding: 6px 10px;
+    border: 2px solid rgba(212,165,116,0.3);
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  /* ===== GRASS TUFTS ===== */
+  .tuft {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 700px) {
+    .map-container {
+      width: 100%;
+      height: auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 16px 100px;
+      gap: 60px;
+    }
+    .zone {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      transform: none !important;
+      width: 260px;
+      height: 220px;
+    }
+    .path-canvas, .water, .compass, .legend { display: none; }
+    .zone-label { top: -28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <h1>Fly Agile Games &mdash; World Map</h1>
+  <div class="subtitle">Choose your adventure</div>
+</div>
+
+<div class="map-wrapper">
+  <div class="map-container" id="map">
+
+    <!-- Path drawn via canvas -->
+    <canvas class="path-canvas" id="pathCanvas"></canvas>
+
+    <!-- Water edges -->
+    <div class="water water-bottom">
+      <div class="water-ripple" style="bottom:8px;left:10%;animation-delay:0s;"></div>
+      <div class="water-ripple" style="bottom:14px;left:30%;animation-delay:0.8s;"></div>
+      <div class="water-ripple" style="bottom:6px;left:55%;animation-delay:1.5s;"></div>
+      <div class="water-ripple" style="bottom:18px;left:75%;animation-delay:0.4s;"></div>
+      <div class="water-ripple" style="bottom:10px;left:90%;animation-delay:2.1s;"></div>
+    </div>
+    <div class="water water-right">
+      <div class="water-ripple" style="right:8px;top:20%;animation-delay:1.2s;width:4px;height:14px;"></div>
+      <div class="water-ripple" style="right:12px;top:50%;animation-delay:0.5s;width:4px;height:14px;"></div>
+      <div class="water-ripple" style="right:6px;top:75%;animation-delay:1.8s;width:4px;height:14px;"></div>
+    </div>
+
+    <!-- ===== ICE ZONE ===== -->
+    <a class="zone zone-ice" href="https://chambre-froide.flyagile.com" target="_blank">
+      <div class="zone-label">
+        <div class="name">La Chambre Froide</div>
+        <div class="status status-live">&#9654; LIVE</div>
+      </div>
+      <div class="zone-terrain">
+        <!-- Ice crystals -->
+        <div class="ice-crystal" style="width:20px;height:20px;top:30px;left:20px;"></div>
+        <div class="ice-crystal" style="width:14px;height:14px;top:80px;left:160px;"></div>
+        <div class="ice-crystal" style="width:16px;height:16px;top:150px;left:60px;"></div>
+        <div class="ice-crystal" style="width:12px;height:12px;top:40px;left:120px;"></div>
+        <div class="ice-crystal" style="width:18px;height:18px;top:170px;left:170px;"></div>
+        <!-- Snow patches -->
+        <div class="snow-patch" style="width:40px;height:20px;top:60px;left:40px;"></div>
+        <div class="snow-patch" style="width:30px;height:16px;top:120px;left:130px;"></div>
+        <div class="snow-patch" style="width:50px;height:24px;top:180px;left:90px;"></div>
+        <div class="snow-patch" style="width:35px;height:18px;top:20px;left:80px;"></div>
+        <!-- Snowflakes -->
+        <div class="snowflake" style="left:15%;animation-duration:4s;animation-delay:0s;"></div>
+        <div class="snowflake" style="left:35%;animation-duration:5s;animation-delay:1.2s;"></div>
+        <div class="snowflake" style="left:55%;animation-duration:4.5s;animation-delay:0.6s;"></div>
+        <div class="snowflake" style="left:75%;animation-duration:5.5s;animation-delay:2s;"></div>
+        <div class="snowflake" style="left:90%;animation-duration:4.2s;animation-delay:0.3s;"></div>
+        <div class="snowflake" style="left:25%;animation-duration:6s;animation-delay:3s;"></div>
+        <div class="snowflake" style="left:65%;animation-duration:3.8s;animation-delay:1.8s;"></div>
+        <div class="snowflake" style="left:45%;animation-duration:5.2s;animation-delay:2.5s;"></div>
+      </div>
+      <!-- Flag on hover -->
+      <div class="zone-flag">
+        <svg viewBox="0 0 20 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="0" width="2" height="28" fill="#5a3a1e"/>
+          <rect x="4" y="2" width="14" height="10" fill="var(--ice-primary)"/>
+          <rect x="6" y="4" width="4" height="4" fill="white" opacity="0.6"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- ===== FIRE ZONE ===== -->
+    <a class="zone zone-fire" href="https://hotplate.flyagile.com" target="_blank">
+      <div class="zone-label">
+        <div class="name">Hotplate</div>
+        <div class="status status-live">&#9654; LIVE</div>
+      </div>
+      <div class="zone-terrain">
+        <!-- Pixel flames -->
+        <div class="pixel-flame" style="left:20px;bottom:10px;">
+          <div class="f1" style="left:0;bottom:0;"></div>
+          <div class="f1" style="left:8px;bottom:0;"></div>
+          <div class="f2" style="left:4px;bottom:8px;"></div>
+          <div class="f3" style="left:4px;bottom:16px;width:4px;height:4px;"></div>
+        </div>
+        <div class="pixel-flame" style="left:160px;bottom:30px;animation-delay:0.2s;">
+          <div class="f1" style="left:0;bottom:0;"></div>
+          <div class="f2" style="left:0;bottom:8px;"></div>
+          <div class="f3" style="left:2px;bottom:14px;width:4px;height:4px;"></div>
+        </div>
+        <div class="pixel-flame" style="left:100px;bottom:60px;animation-delay:0.15s;">
+          <div class="f1" style="left:0;bottom:0;"></div>
+          <div class="f1" style="left:8px;bottom:0;"></div>
+          <div class="f2" style="left:4px;bottom:8px;"></div>
+        </div>
+        <!-- Kitchen garden patches -->
+        <div class="garden-patch" style="width:50px;height:30px;top:30px;left:30px;">
+          <div class="garden-row" style="top:6px;"></div>
+          <div class="garden-row" style="top:16px;"></div>
+          <div class="garden-row" style="top:24px;"></div>
+        </div>
+        <div class="garden-patch" style="width:40px;height:24px;top:80px;left:140px;">
+          <div class="garden-row" style="top:4px;"></div>
+          <div class="garden-row" style="top:14px;"></div>
+        </div>
+        <div class="garden-patch" style="width:45px;height:28px;top:140px;left:70px;">
+          <div class="garden-row" style="top:5px;"></div>
+          <div class="garden-row" style="top:14px;"></div>
+          <div class="garden-row" style="top:22px;"></div>
+        </div>
+        <!-- Steam particles -->
+        <div class="steam-particle" style="left:40px;top:100px;animation-delay:0s;"></div>
+        <div class="steam-particle" style="left:120px;top:80px;animation-delay:0.8s;"></div>
+        <div class="steam-particle" style="left:180px;top:120px;animation-delay:1.5s;"></div>
+        <div class="steam-particle" style="left:80px;top:50px;animation-delay:2.2s;"></div>
+        <div class="steam-particle" style="left:150px;top:150px;animation-delay:0.4s;"></div>
+      </div>
+      <div class="zone-flag">
+        <svg viewBox="0 0 20 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="0" width="2" height="28" fill="#5a3a1e"/>
+          <rect x="4" y="2" width="14" height="10" fill="var(--fire-primary)"/>
+          <rect x="8" y="4" width="6" height="6" fill="var(--fire-secondary)" opacity="0.7"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- ===== MAGIC ZONE ===== -->
+    <a class="zone zone-magic" href="#" onclick="event.preventDefault();">
+      <div class="zone-label">
+        <div class="name">Rabbits &amp; Hats</div>
+        <div class="status status-soon">&#9733; COMING SOON</div>
+      </div>
+      <div class="zone-terrain">
+        <!-- Trees -->
+        <div class="pixel-tree" style="left:20px;top:30px;">
+          <div class="tree-top" style="width:20px;height:16px;left:0;top:0;border-radius:4px 4px 0 0;"></div>
+          <div class="tree-trunk" style="width:6px;height:12px;left:7px;top:16px;"></div>
+        </div>
+        <div class="pixel-tree" style="left:170px;top:50px;">
+          <div class="tree-top" style="width:24px;height:20px;left:0;top:0;border-radius:4px 4px 0 0;background:#1e5e30;"></div>
+          <div class="tree-trunk" style="width:6px;height:14px;left:9px;top:20px;"></div>
+        </div>
+        <div class="pixel-tree" style="left:80px;top:140px;">
+          <div class="tree-top" style="width:18px;height:14px;left:0;top:0;border-radius:4px 4px 0 0;background:#2a7e3e;"></div>
+          <div class="tree-trunk" style="width:6px;height:10px;left:6px;top:14px;"></div>
+        </div>
+        <div class="pixel-tree" style="left:130px;top:160px;">
+          <div class="tree-top" style="width:22px;height:18px;left:0;top:0;border-radius:4px 4px 0 0;background:#1e6e35;"></div>
+          <div class="tree-trunk" style="width:6px;height:12px;left:8px;top:18px;"></div>
+        </div>
+        <!-- Mushrooms -->
+        <div class="mushroom" style="left:60px;top:80px;">
+          <div class="mush-cap" style="width:14px;height:8px;background:#9b5de5;left:0;top:0;"></div>
+          <div class="mush-stem" style="width:4px;height:6px;left:5px;top:8px;"></div>
+        </div>
+        <div class="mushroom" style="left:150px;top:110px;">
+          <div class="mush-cap" style="width:12px;height:7px;background:#c77dff;left:0;top:0;"></div>
+          <div class="mush-stem" style="width:4px;height:5px;left:4px;top:7px;"></div>
+        </div>
+        <div class="mushroom" style="left:40px;top:170px;">
+          <div class="mush-cap" style="width:10px;height:6px;background:#7b2dce;left:0;top:0;"></div>
+          <div class="mush-stem" style="width:3px;height:5px;left:3px;top:6px;"></div>
+        </div>
+        <!-- Sparkles -->
+        <div class="magic-sparkle" style="left:50px;top:40px;animation-delay:0s;"></div>
+        <div class="magic-sparkle" style="left:140px;top:30px;animation-delay:0.7s;"></div>
+        <div class="magic-sparkle" style="left:100px;top:100px;animation-delay:1.4s;"></div>
+        <div class="magic-sparkle" style="left:30px;top:130px;animation-delay:2.1s;"></div>
+        <div class="magic-sparkle" style="left:180px;top:150px;animation-delay:0.3s;"></div>
+        <div class="magic-sparkle" style="left:70px;top:190px;animation-delay:1.8s;"></div>
+        <div class="magic-sparkle" style="left:160px;top:80px;animation-delay:2.5s;"></div>
+        <div class="magic-sparkle" style="left:110px;top:170px;animation-delay:0.9s;"></div>
+        <!-- Question marks -->
+        <div class="question-mark" style="left:90px;top:55px;animation-delay:0.5s;">?</div>
+        <div class="question-mark" style="left:160px;top:130px;animation-delay:1.5s;">?</div>
+        <div class="question-mark" style="left:45px;top:105px;animation-delay:2.5s;">?</div>
+      </div>
+      <!-- Fog of war -->
+      <div class="fog-layer">
+        <div class="fog-cloud" style="width:180px;height:120px;top:-10px;left:20px;"></div>
+        <div class="fog-cloud" style="width:200px;height:140px;top:60px;left:-20px;animation-delay:-3s;"></div>
+        <div class="fog-cloud" style="width:160px;height:110px;top:80px;left:80px;animation-delay:-5s;"></div>
+        <div class="fog-cloud" style="width:190px;height:130px;top:10px;left:100px;animation-delay:-2s;"></div>
+        <div class="fog-cloud" style="width:170px;height:120px;top:120px;left:30px;animation-delay:-7s;"></div>
+      </div>
+      <div class="zone-flag">
+        <svg viewBox="0 0 20 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="0" width="2" height="28" fill="#5a3a1e"/>
+          <rect x="4" y="2" width="14" height="10" fill="var(--magic-primary)"/>
+          <rect x="8" y="5" width="6" height="4" fill="var(--magic-secondary)" opacity="0.6"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- Grass tufts scattered on map -->
+    <div class="tuft" style="left:310px;top:60px;color:#5a7e3e;font-size:14px;">&#9652;&#9652;</div>
+    <div class="tuft" style="left:400px;top:200px;color:#4a6e2e;font-size:12px;">&#9652;&#9652;&#9652;</div>
+    <div class="tuft" style="left:500px;top:100px;color:#5a8e3e;font-size:10px;">&#9652;&#9652;</div>
+    <div class="tuft" style="left:340px;top:350px;color:#4a7e2e;font-size:13px;">&#9652;&#9652;</div>
+    <div class="tuft" style="left:700px;top:400px;color:#5a7e3e;font-size:11px;">&#9652;&#9652;</div>
+    <div class="tuft" style="left:200px;top:450px;color:#4a6e2e;font-size:14px;">&#9652;</div>
+    <div class="tuft" style="left:580px;top:500px;color:#5a8e3e;font-size:12px;">&#9652;&#9652;</div>
+
+    <!-- Compass Rose -->
+    <div class="compass">
+      <div class="compass-body">
+        <div class="compass-needle needle-v"></div>
+        <div class="compass-needle needle-h"></div>
+        <div class="compass-diamond"></div>
+        <div class="compass-center"></div>
+        <div class="compass-point cp-n">N</div>
+        <div class="compass-point cp-s">S</div>
+        <div class="compass-point cp-e">E</div>
+        <div class="compass-point cp-w">W</div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">&#9654; Click a zone to play</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Draw pixel path on canvas
+  const canvas = document.getElementById('pathCanvas');
+  const map = document.getElementById('map');
+
+  function drawPath() {
+    const w = map.offsetWidth;
+    const h = map.offsetHeight;
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    // Scale factors for responsive
+    const sx = w / 900;
+    const sy = h / 640;
+
+    // Path waypoints (connecting zone centers)
+    // Ice center: ~150, 170 -> Fire center: ~710, 190 -> Magic center: ~450, 470
+    const points = [
+      [150*sx, 170*sy],
+      [200*sx, 200*sy],
+      [260*sx, 230*sy],
+      [310*sx, 250*sy],
+      [360*sx, 250*sy],
+      [410*sx, 240*sy],
+      [460*sx, 230*sy],
+      [510*sx, 220*sy],
+      [560*sx, 210*sy],
+      [610*sx, 200*sy],
+      [660*sx, 195*sy],
+      [710*sx, 190*sy],
+    ];
+
+    // Branch from midpath down to magic zone
+    const branch = [
+      [460*sx, 230*sy],
+      [460*sx, 270*sy],
+      [455*sx, 310*sy],
+      [450*sx, 350*sy],
+      [450*sx, 390*sy],
+      [450*sx, 430*sy],
+      [450*sx, 470*sy],
+    ];
+
+    ctx.strokeStyle = '#d4a574';
+    ctx.lineWidth = 4;
+    ctx.setLineDash([8, 8]);
+    ctx.lineCap = 'square';
+
+    // Main path
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i][0], points[i][1]);
+    }
+    ctx.stroke();
+
+    // Branch path
+    ctx.beginPath();
+    ctx.moveTo(branch[0][0], branch[0][1]);
+    for (let i = 1; i < branch.length; i++) {
+      ctx.lineTo(branch[i][0], branch[i][1]);
+    }
+    ctx.stroke();
+
+    // Path nodes (pixel dots at intersections)
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#e8c99a';
+    const nodePts = [points[0], points[points.length-1], branch[0], branch[branch.length-1]];
+    nodePts.forEach(p => {
+      ctx.fillRect(p[0]-4, p[1]-4, 8, 8);
+    });
+  }
+
+  drawPath();
+  window.addEventListener('resize', drawPath);
+})();
+</script>
+</body>
+</html>

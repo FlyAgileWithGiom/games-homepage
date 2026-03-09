@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fly Agile Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1b2e;
+    color: #c8c9d4;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+
+  h1 {
+    font-family: 'Silkscreen', cursive;
+    font-size: 1.6rem;
+    letter-spacing: 0.15em;
+    color: #7a7b94;
+    font-weight: 400;
+    margin-bottom: 0.6rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: #4e4f66;
+    letter-spacing: 0.05em;
+  }
+
+  .games {
+    display: flex;
+    gap: 5rem;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.3s ease;
+    cursor: default;
+  }
+
+  a.game { cursor: pointer; }
+
+  .game:hover { transform: scale(1.05); }
+
+  .sprite-wrap {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.4rem;
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* Glow on hover per game */
+  .game.cyan:hover .sprite-wrap { box-shadow: 0 0 40px rgba(100, 220, 255, 0.2), 0 0 80px rgba(100, 220, 255, 0.08); }
+  .game.amber:hover .sprite-wrap { box-shadow: 0 0 40px rgba(255, 180, 60, 0.2), 0 0 80px rgba(255, 180, 60, 0.08); }
+  .game.purple:hover .sprite-wrap { box-shadow: 0 0 40px rgba(200, 120, 255, 0.2), 0 0 80px rgba(200, 120, 255, 0.08); }
+
+  .sprite {
+    width: 1px;
+    height: 1px;
+    image-rendering: pixelated;
+  }
+
+  .game-name {
+    font-family: 'Silkscreen', cursive;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+    text-align: center;
+  }
+
+  .game.cyan .game-name { color: #64dcff; }
+  .game.amber .game-name { color: #ffb43c; }
+  .game.purple .game-name { color: #c878ff; }
+
+  .game-desc {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: #5a5b72;
+    text-align: center;
+    margin-bottom: 0.6rem;
+  }
+
+  .badge {
+    font-family: 'Silkscreen', cursive;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    padding: 0.2em 0.7em;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .badge.live {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+  }
+
+  .badge.soon {
+    color: #5a5b72;
+    background: rgba(90, 91, 114, 0.1);
+  }
+
+  .game.coming-soon {
+    opacity: 0.45;
+  }
+
+  .game.coming-soon:hover {
+    opacity: 0.55;
+  }
+
+  footer {
+    margin-top: 5rem;
+    font-size: 0.7rem;
+    color: #2e2f45;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---- PIXEL ART SPRITES via box-shadow ---- */
+  /* Each "pixel" is 8px. Sprite grid roughly 16x16 = 128px rendered */
+
+  .sprite-snowflake {
+    color: transparent;
+    box-shadow:
+      /* Center cross - vertical */
+      56px 0px 0 #4adbff, 56px 8px 0 #64e8ff, 56px 16px 0 #3ccde8, 56px 24px 0 #2ab8d4,
+      56px 32px 0 #64e8ff, 56px 40px 0 #4adbff, 56px 48px 0 #8af0ff, 56px 56px 0 #b0f4ff,
+      56px 64px 0 #4adbff,
+      56px 72px 0 #b0f4ff, 56px 80px 0 #8af0ff, 56px 88px 0 #4adbff,
+      56px 96px 0 #64e8ff, 56px 104px 0 #2ab8d4, 56px 112px 0 #3ccde8, 56px 120px 0 #64e8ff,
+      /* Center cross - horizontal */
+      0px 56px 0 #4adbff, 8px 56px 0 #64e8ff, 16px 56px 0 #3ccde8, 24px 56px 0 #2ab8d4,
+      32px 56px 0 #64e8ff, 40px 56px 0 #4adbff, 48px 56px 0 #8af0ff,
+      64px 56px 0 #8af0ff, 72px 56px 0 #4adbff, 80px 56px 0 #64e8ff,
+      88px 56px 0 #2ab8d4, 96px 56px 0 #3ccde8, 104px 56px 0 #64e8ff, 112px 56px 0 #4adbff,
+      /* Diagonal top-left to center */
+      16px 16px 0 #2ab8d4, 24px 24px 0 #3ccde8, 32px 32px 0 #64e8ff, 40px 40px 0 #8af0ff,
+      48px 48px 0 #b0f4ff,
+      /* Diagonal top-right to center */
+      96px 16px 0 #2ab8d4, 88px 24px 0 #3ccde8, 80px 32px 0 #64e8ff, 72px 40px 0 #8af0ff,
+      64px 48px 0 #b0f4ff,
+      /* Diagonal bottom-left to center */
+      16px 96px 0 #2ab8d4, 24px 88px 0 #3ccde8, 32px 80px 0 #64e8ff, 40px 72px 0 #8af0ff,
+      48px 64px 0 #b0f4ff,
+      /* Diagonal bottom-right to center */
+      96px 96px 0 #2ab8d4, 88px 88px 0 #3ccde8, 80px 80px 0 #64e8ff, 72px 72px 0 #8af0ff,
+      64px 64px 0 #b0f4ff,
+      /* Branch tips */
+      8px 8px 0 #1a9db8, 104px 8px 0 #1a9db8, 8px 104px 0 #1a9db8, 104px 104px 0 #1a9db8,
+      /* Small accents on arms */
+      40px 56px 0 #b0f4ff, 72px 56px 0 #b0f4ff,
+      56px 40px 0 #b0f4ff, 56px 72px 0 #b0f4ff,
+      /* Side branches */
+      24px 40px 0 #4adbff, 40px 24px 0 #4adbff,
+      88px 40px 0 #4adbff, 72px 24px 0 #4adbff,
+      24px 72px 0 #4adbff, 40px 88px 0 #4adbff,
+      88px 72px 0 #4adbff, 72px 88px 0 #4adbff;
+  }
+
+  .sprite-hotplate {
+    color: transparent;
+    box-shadow:
+      /* Pan base - dark circle */
+      32px 48px 0 #6b5b4f, 40px 48px 0 #7a6a5e, 48px 48px 0 #8a7a6e, 56px 48px 0 #8a7a6e,
+      64px 48px 0 #8a7a6e, 72px 48px 0 #7a6a5e, 80px 48px 0 #6b5b4f,
+      24px 56px 0 #6b5b4f, 32px 56px 0 #8a7a6e, 40px 56px 0 #9a8a7e, 48px 56px 0 #a89888,
+      56px 56px 0 #b0a090, 64px 56px 0 #a89888, 72px 56px 0 #9a8a7e, 80px 56px 0 #8a7a6e, 88px 56px 0 #6b5b4f,
+      24px 64px 0 #6b5b4f, 32px 64px 0 #9a8a7e, 40px 64px 0 #a89888, 48px 64px 0 #b0a090,
+      56px 64px 0 #b8a898, 64px 64px 0 #b0a090, 72px 64px 0 #a89888, 80px 64px 0 #9a8a7e, 88px 64px 0 #6b5b4f,
+      24px 72px 0 #6b5b4f, 32px 72px 0 #8a7a6e, 40px 72px 0 #9a8a7e, 48px 72px 0 #a89888,
+      56px 72px 0 #b0a090, 64px 72px 0 #a89888, 72px 72px 0 #9a8a7e, 80px 72px 0 #8a7a6e, 88px 72px 0 #6b5b4f,
+      32px 80px 0 #6b5b4f, 40px 80px 0 #7a6a5e, 48px 80px 0 #8a7a6e, 56px 80px 0 #8a7a6e,
+      64px 80px 0 #8a7a6e, 72px 80px 0 #7a6a5e, 80px 80px 0 #6b5b4f,
+      /* Pan rim highlight */
+      32px 48px 0 #9a8a7e, 40px 48px 0 #a89888, 48px 48px 0 #b0a090,
+      56px 48px 0 #b0a090, 64px 48px 0 #a89888, 72px 48px 0 #9a8a7e,
+      /* Handle */
+      88px 64px 0 #5a4a3e, 96px 64px 0 #5a4a3e, 104px 64px 0 #4a3a2e, 112px 64px 0 #4a3a2e,
+      120px 64px 0 #3a2a1e,
+      88px 56px 0 #6b5b4f, 96px 56px 0 #5a4a3e, 104px 56px 0 #4a3a2e,
+      /* Flames under pan */
+      40px 88px 0 #ff6420, 48px 88px 0 #ff8c2a, 56px 88px 0 #ffb43c,
+      64px 88px 0 #ff8c2a, 72px 88px 0 #ff6420,
+      32px 96px 0 #ff4500, 40px 96px 0 #ff6420, 48px 96px 0 #ffb43c, 56px 96px 0 #ffd060,
+      64px 96px 0 #ffb43c, 72px 96px 0 #ff6420, 80px 96px 0 #ff4500,
+      40px 104px 0 #ff4500, 48px 104px 0 #ff6420, 56px 104px 0 #ff8c2a,
+      64px 104px 0 #ff6420, 72px 104px 0 #ff4500,
+      48px 112px 0 #cc3300, 56px 112px 0 #ff4500, 64px 112px 0 #cc3300,
+      /* Flame tips - bright highlights */
+      48px 88px 0 #ffd060, 64px 88px 0 #ffd060,
+      56px 96px 0 #ffe880,
+      /* Steam wisps above pan */
+      40px 40px 0 #2a2b44, 48px 32px 0 #2a2b44, 64px 36px 0 #2a2b44, 72px 28px 0 #2a2b44,
+      56px 24px 0 #252640;
+  }
+
+  .sprite-rabbit {
+    color: transparent;
+    box-shadow:
+      /* Hat brim */
+      24px 56px 0 #4a2878, 32px 56px 0 #5a3498, 40px 56px 0 #6b40a8, 48px 56px 0 #7c4cb8,
+      56px 56px 0 #7c4cb8, 64px 56px 0 #7c4cb8, 72px 56px 0 #6b40a8, 80px 56px 0 #5a3498,
+      88px 56px 0 #4a2878,
+      /* Hat body */
+      32px 48px 0 #5a3498, 40px 48px 0 #6b40a8, 48px 48px 0 #7c4cb8,
+      56px 48px 0 #8c58c8, 64px 48px 0 #7c4cb8, 72px 48px 0 #6b40a8, 80px 48px 0 #5a3498,
+      32px 40px 0 #5a3498, 40px 40px 0 #6b40a8, 48px 40px 0 #7c4cb8,
+      56px 40px 0 #8c58c8, 64px 40px 0 #7c4cb8, 72px 40px 0 #6b40a8, 80px 40px 0 #5a3498,
+      32px 32px 0 #5a3498, 40px 32px 0 #6b40a8, 48px 32px 0 #7c4cb8,
+      56px 32px 0 #8c58c8, 64px 32px 0 #7c4cb8, 72px 32px 0 #6b40a8, 80px 32px 0 #5a3498,
+      40px 24px 0 #5a3498, 48px 24px 0 #6b40a8, 56px 24px 0 #7c4cb8,
+      64px 24px 0 #6b40a8, 72px 24px 0 #5a3498,
+      /* Hat band */
+      32px 52px 0 #ff69b4, 40px 52px 0 #ff69b4, 48px 52px 0 #ff80c0,
+      56px 52px 0 #ff80c0, 64px 52px 0 #ff80c0, 72px 52px 0 #ff69b4, 80px 52px 0 #ff69b4,
+      /* Rabbit ears poking out */
+      40px 16px 0 #f0d0e0, 40px 8px 0 #f0d0e0, 40px 0px 0 #e8b8d0,
+      72px 16px 0 #f0d0e0, 72px 8px 0 #f0d0e0, 72px 0px 0 #e8b8d0,
+      /* Ear insides */
+      40px 8px 0 #ff9ec0, 72px 8px 0 #ff9ec0,
+      /* Rabbit face */
+      40px 64px 0 #f0d0e0, 48px 64px 0 #f8e0ee, 56px 64px 0 #f8e0ee,
+      64px 64px 0 #f8e0ee, 72px 64px 0 #f0d0e0,
+      40px 72px 0 #f0d0e0, 48px 72px 0 #f8e0ee, 56px 72px 0 #f8e0ee,
+      64px 72px 0 #f8e0ee, 72px 72px 0 #f0d0e0,
+      48px 80px 0 #f0d0e0, 56px 80px 0 #f8e0ee, 64px 80px 0 #f0d0e0,
+      /* Eyes */
+      48px 64px 0 #2a1a30, 64px 64px 0 #2a1a30,
+      /* Eye shine */
+      48px 64px 0 #3a2a40, 64px 64px 0 #3a2a40,
+      /* Nose */
+      56px 72px 0 #ff9ec0,
+      /* Mouth */
+      48px 80px 0 #e8b8d0, 64px 80px 0 #e8b8d0,
+      /* Whiskers */
+      24px 72px 0 #d4b0c8, 32px 72px 0 #d4b0c8,
+      80px 72px 0 #d4b0c8, 88px 72px 0 #d4b0c8,
+      /* Stars / sparkle accents */
+      16px 24px 0 #ffd700, 96px 16px 0 #ffd700, 8px 48px 0 #ffd700,
+      104px 40px 0 #ffd700,
+      /* Small sparkle dots */
+      24px 32px 0 #ffe44d, 88px 24px 0 #ffe44d;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .games { gap: 3rem; }
+  }
+
+  @media (max-width: 600px) {
+    .games { flex-direction: column; align-items: center; gap: 3.5rem; }
+    header { margin-bottom: 3.5rem; }
+    h1 { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FLY AGILE GAMES</h1>
+  <p class="subtitle">Jeux collaboratifs pour coaches agiles</p>
+</header>
+
+<main class="games">
+
+  <a href="https://chambre-froide.flyagile.com" class="game cyan">
+    <div class="sprite-wrap">
+      <div class="sprite sprite-snowflake"></div>
+    </div>
+    <div class="game-name">La Chambre Froide</div>
+    <div class="game-desc">Puzzle mathematique retro-terminal</div>
+    <span class="badge live">Live</span>
+  </a>
+
+  <a href="https://hotplate.flyagile.com" class="game amber">
+    <div class="sprite-wrap">
+      <div class="sprite sprite-hotplate"></div>
+    </div>
+    <div class="game-name">Hotplate</div>
+    <div class="game-desc">Jeu de cuisine collaboratif</div>
+    <span class="badge live">Live</span>
+  </a>
+
+  <div class="game purple coming-soon">
+    <div class="sprite-wrap">
+      <div class="sprite sprite-rabbit"></div>
+    </div>
+    <div class="game-name">Rabbits & Hats</div>
+    <div class="game-desc">Puzzle multijoueur strategie</div>
+    <span class="badge soon">Coming Soon</span>
+  </div>
+
+</main>
+
+<footer>&copy; 2026 Fly Agile</footer>
+
+</body>
+</html>

@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fly Agile Games - Pixel Village</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --sky-top: #2d1b4e;
+    --sky-mid: #7b3f7d;
+    --sky-warm: #d46a4e;
+    --sky-orange: #e8954a;
+    --sky-yellow: #f5c842;
+    --ground-dark: #3a6b35;
+    --ground-mid: #4a8b3f;
+    --ground-light: #5da64a;
+    --path-color: #c4a35a;
+    --path-dark: #a68940;
+    --warm-glow: #f5c842;
+    --pixel: 4px;
+  }
+
+  body {
+    font-family: 'Silkscreen', cursive;
+    background: var(--sky-top);
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    image-rendering: pixelated;
+  }
+
+  /* === SKY === */
+  .sky {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(
+      180deg,
+      var(--sky-top) 0%,
+      var(--sky-mid) 25%,
+      var(--sky-warm) 50%,
+      var(--sky-orange) 65%,
+      var(--sky-yellow) 80%,
+      var(--ground-light) 80%,
+      var(--ground-mid) 85%,
+      var(--ground-dark) 100%
+    );
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* === STARS === */
+  .stars {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 30%;
+    pointer-events: none;
+  }
+  .star {
+    position: absolute;
+    width: var(--pixel);
+    height: var(--pixel);
+    background: #fff;
+    animation: twinkle 2s ease-in-out infinite alternate;
+  }
+  .star:nth-child(1) { top: 5%; left: 10%; animation-delay: 0s; }
+  .star:nth-child(2) { top: 8%; left: 25%; animation-delay: 0.5s; }
+  .star:nth-child(3) { top: 3%; left: 45%; animation-delay: 1s; }
+  .star:nth-child(4) { top: 12%; left: 60%; animation-delay: 0.3s; }
+  .star:nth-child(5) { top: 6%; left: 78%; animation-delay: 0.8s; }
+  .star:nth-child(6) { top: 15%; left: 90%; animation-delay: 1.2s; }
+  .star:nth-child(7) { top: 10%; left: 35%; animation-delay: 0.6s; }
+  .star:nth-child(8) { top: 2%; left: 55%; animation-delay: 1.5s; }
+  .star:nth-child(9) { top: 18%; left: 15%; animation-delay: 0.2s; }
+  .star:nth-child(10) { top: 7%; left: 70%; animation-delay: 0.9s; }
+
+  @keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+
+  /* === CLOUDS === */
+  .cloud {
+    position: absolute;
+    pointer-events: none;
+  }
+  .cloud-1 {
+    top: 18%;
+    animation: drift 40s linear infinite;
+  }
+  .cloud-2 {
+    top: 12%;
+    animation: drift 55s linear infinite;
+    animation-delay: -20s;
+  }
+  .cloud-3 {
+    top: 25%;
+    animation: drift 35s linear infinite;
+    animation-delay: -10s;
+  }
+  .cloud .block {
+    position: absolute;
+    background: rgba(255, 200, 150, 0.35);
+  }
+  .cloud-1 .block:nth-child(1) { width: 32px; height: 16px; top: 0; left: 16px; }
+  .cloud-1 .block:nth-child(2) { width: 64px; height: 16px; top: 16px; left: 0; }
+  .cloud-1 .block:nth-child(3) { width: 48px; height: 16px; top: 32px; left: 8px; }
+
+  .cloud-2 .block:nth-child(1) { width: 24px; height: 12px; top: 0; left: 12px; }
+  .cloud-2 .block:nth-child(2) { width: 48px; height: 12px; top: 12px; left: 0; }
+  .cloud-2 .block:nth-child(3) { width: 36px; height: 12px; top: 24px; left: 6px; }
+
+  .cloud-3 .block:nth-child(1) { width: 40px; height: 16px; top: 0; left: 20px; }
+  .cloud-3 .block:nth-child(2) { width: 80px; height: 16px; top: 16px; left: 0; }
+  .cloud-3 .block:nth-child(3) { width: 56px; height: 16px; top: 32px; left: 12px; }
+
+  @keyframes drift {
+    0% { transform: translateX(-150px); }
+    100% { transform: translateX(calc(100vw + 150px)); }
+  }
+
+  /* === SUN === */
+  .sun {
+    position: absolute;
+    top: 38%;
+    right: 12%;
+    width: 60px;
+    height: 60px;
+    background: var(--sky-yellow);
+    box-shadow:
+      0 0 0 8px rgba(245, 200, 66, 0.4),
+      0 0 0 20px rgba(245, 200, 66, 0.15),
+      0 0 40px rgba(245, 200, 66, 0.3);
+    pointer-events: none;
+  }
+
+  /* === HEADER === */
+  .header {
+    margin-top: 6vh;
+    text-align: center;
+    z-index: 10;
+    position: relative;
+  }
+  .header h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    color: var(--warm-glow);
+    text-shadow:
+      2px 2px 0 #a0522d,
+      4px 4px 0 rgba(0,0,0,0.3),
+      0 0 20px rgba(245, 200, 66, 0.5),
+      0 0 40px rgba(245, 200, 66, 0.2);
+    letter-spacing: 4px;
+  }
+  .header .subtitle {
+    font-size: clamp(12px, 2vw, 18px);
+    color: #f5deb3;
+    margin-top: 12px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+    letter-spacing: 2px;
+  }
+
+  /* === VILLAGE SCENE === */
+  .village {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    margin-top: 8vh;
+    padding: 0 20px;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    gap: clamp(20px, 4vw, 60px);
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  /* === PATH === */
+  .path-container {
+    position: absolute;
+    bottom: -10px;
+    left: 5%;
+    right: 5%;
+    height: 24px;
+    z-index: 1;
+  }
+  .path-road {
+    width: 100%;
+    height: 16px;
+    background: var(--path-color);
+    border-top: 4px solid var(--path-dark);
+    border-bottom: 4px solid var(--path-dark);
+    position: absolute;
+    bottom: 0;
+  }
+  .path-road::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--path-dark) 0px,
+      var(--path-dark) 12px,
+      transparent 12px,
+      transparent 28px
+    );
+  }
+
+  /* === BUILDINGS === */
+  .building {
+    position: relative;
+    cursor: pointer;
+    z-index: 3;
+    transition: transform 0.15s ease;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .building:hover {
+    transform: translateY(-6px);
+  }
+  .building:hover .door {
+    background: #ffe680;
+    box-shadow: 0 0 12px #ffe680, 0 0 24px rgba(255, 230, 128, 0.5);
+  }
+  .building:active {
+    transform: translateY(-2px);
+  }
+
+  .building-body {
+    position: relative;
+    image-rendering: pixelated;
+  }
+
+  .building-label {
+    margin-top: 8px;
+    padding: 4px 12px;
+    font-size: clamp(11px, 1.5vw, 15px);
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .status-badge {
+    font-size: clamp(8px, 1vw, 11px);
+    padding: 2px 8px;
+    margin-top: 4px;
+    display: inline-block;
+    letter-spacing: 1px;
+  }
+  .status-live {
+    background: #4caf50;
+    color: #fff;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
+    animation: pulse-live 2s ease-in-out infinite;
+  }
+  .status-soon {
+    background: #e8954a;
+    color: #fff;
+    animation: pulse-soon 2s ease-in-out infinite;
+  }
+  @keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  @keyframes pulse-soon {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* === CHAMBRE FROIDE (Ice house) === */
+  .chambre-froide .building-body {
+    width: 160px;
+    height: 180px;
+  }
+  .cf-base {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    width: 140px;
+    height: 120px;
+    background: #a8d8ea;
+    border: 4px solid #7eb8cc;
+  }
+  .cf-base::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, #c8eaf5 0px, #c8eaf5 8px, #a8d8ea 8px, #a8d8ea 16px);
+  }
+  .cf-roof {
+    position: absolute;
+    bottom: 120px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    border-bottom: 60px solid #7eb8cc;
+  }
+  .cf-roof::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: -60px;
+    width: 120px;
+    height: 8px;
+    background: #c8eaf5;
+  }
+  .cf-icicle {
+    position: absolute;
+    bottom: 116px;
+    width: 6px;
+    background: linear-gradient(180deg, #c8eaf5, #e8f4f8);
+  }
+  .cf-icicle:nth-child(4) { left: 25px; height: 16px; }
+  .cf-icicle:nth-child(5) { left: 50px; height: 22px; }
+  .cf-icicle:nth-child(6) { left: 75px; height: 14px; }
+  .cf-icicle:nth-child(7) { left: 100px; height: 20px; }
+  .cf-icicle:nth-child(8) { left: 125px; height: 12px; }
+
+  .cf-window {
+    position: absolute;
+    width: 24px;
+    height: 28px;
+    background: #4a90b8;
+    border: 3px solid #5fafc8;
+    box-shadow: inset 0 0 6px rgba(100, 200, 255, 0.5);
+  }
+  .cf-window-1 { bottom: 60px; left: 30px; }
+  .cf-window-2 { bottom: 60px; right: 30px; }
+  .cf-window::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 100%;
+    background: #5fafc8;
+  }
+
+  .chambre-froide .door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 44px;
+    background: #5fafc8;
+    border: 3px solid #7eb8cc;
+    border-bottom: none;
+    transition: all 0.3s ease;
+  }
+  .chambre-froide .door::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    right: 5px;
+    width: 5px;
+    height: 5px;
+    background: #c8eaf5;
+    border-radius: 50%;
+  }
+
+  /* Snowflakes */
+  .snowflake {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #e8f4f8;
+    pointer-events: none;
+    animation: snowfall linear infinite;
+  }
+  .snowflake:nth-child(11) { left: 15%; top: -10px; animation-duration: 3s; animation-delay: 0s; }
+  .snowflake:nth-child(12) { left: 40%; top: -10px; animation-duration: 2.5s; animation-delay: 0.5s; }
+  .snowflake:nth-child(13) { left: 65%; top: -10px; animation-duration: 3.5s; animation-delay: 1s; }
+  .snowflake:nth-child(14) { left: 85%; top: -10px; animation-duration: 2.8s; animation-delay: 1.5s; }
+  .snowflake:nth-child(15) { left: 30%; top: -10px; animation-duration: 3.2s; animation-delay: 0.8s; }
+  .snowflake:nth-child(16) { left: 55%; top: -10px; animation-duration: 2.6s; animation-delay: 1.2s; }
+
+  @keyframes snowfall {
+    0% { transform: translateY(0) translateX(0); opacity: 1; }
+    50% { transform: translateY(90px) translateX(8px); opacity: 0.8; }
+    100% { transform: translateY(180px) translateX(-4px); opacity: 0; }
+  }
+
+  /* === HOTPLATE (Restaurant) === */
+  .hotplate .building-body {
+    width: 180px;
+    height: 190px;
+  }
+  .hp-base {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    width: 160px;
+    height: 130px;
+    background: #c97c4a;
+    border: 4px solid #a0623a;
+  }
+  .hp-base::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: #8b5e3c;
+    border-top: 4px solid #a0623a;
+  }
+  .hp-roof {
+    position: absolute;
+    bottom: 130px;
+    left: -2px;
+    width: 184px;
+    height: 16px;
+    background: #8b3a3a;
+  }
+  .hp-roof::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    width: 144px;
+    height: 20px;
+    background: #a04040;
+    border-bottom: 4px solid #8b3a3a;
+  }
+  .hp-roof::after {
+    content: '';
+    position: absolute;
+    top: -36px;
+    left: 52px;
+    width: 80px;
+    height: 16px;
+    background: #8b3a3a;
+  }
+  .hp-chimney {
+    position: absolute;
+    bottom: 166px;
+    right: 35px;
+    width: 20px;
+    height: 30px;
+    background: #8b5e3c;
+    border: 3px solid #6b4226;
+  }
+  .hp-chimney::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -4px;
+    width: 28px;
+    height: 6px;
+    background: #6b4226;
+  }
+
+  /* Smoke */
+  .smoke-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(200, 180, 160, 0.5);
+    pointer-events: none;
+    animation: smoke-rise 3s ease-out infinite;
+  }
+  .smoke-particle:nth-child(5) {
+    bottom: 196px; right: 40px;
+    animation-delay: 0s;
+  }
+  .smoke-particle:nth-child(6) {
+    bottom: 196px; right: 38px;
+    animation-delay: 1s;
+  }
+  .smoke-particle:nth-child(7) {
+    bottom: 196px; right: 42px;
+    animation-delay: 2s;
+  }
+  @keyframes smoke-rise {
+    0% { transform: translateY(0) scale(1); opacity: 0.6; }
+    50% { transform: translateY(-30px) translateX(8px) scale(1.5); opacity: 0.3; }
+    100% { transform: translateY(-60px) translateX(16px) scale(2); opacity: 0; }
+  }
+
+  .hp-window {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background: #f5c842;
+    border: 3px solid #a0623a;
+    box-shadow: 0 0 8px rgba(245, 200, 66, 0.4);
+  }
+  .hp-window-1 { bottom: 70px; left: 25px; }
+  .hp-window-2 { bottom: 70px; right: 25px; }
+  .hp-window::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 100%;
+    background: #a0623a;
+  }
+  .hp-window::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 3px;
+    background: #a0623a;
+  }
+
+  .hp-sign {
+    position: absolute;
+    bottom: 106px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 3px 10px;
+    background: #2d1b0e;
+    color: #f5c842;
+    font-family: 'Silkscreen', cursive;
+    font-size: 9px;
+    border: 2px solid #f5c842;
+    white-space: nowrap;
+  }
+  .hp-awning {
+    position: absolute;
+    bottom: 44px;
+    left: 10px;
+    width: 160px;
+    height: 12px;
+    background: repeating-linear-gradient(
+      90deg,
+      #cc3333 0px,
+      #cc3333 16px,
+      #fff 16px,
+      #fff 32px
+    );
+    border-bottom: 3px solid #a02020;
+  }
+
+  .hotplate .door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 48px;
+    background: #6b4226;
+    border: 3px solid #a0623a;
+    border-bottom: none;
+    transition: all 0.3s ease;
+  }
+  .hotplate .door::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 5px;
+    width: 6px;
+    height: 6px;
+    background: #f5c842;
+    border-radius: 50%;
+  }
+
+  /* Warm glow under hotplate */
+  .hotplate .building-body::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 20px;
+    right: 20px;
+    height: 8px;
+    background: radial-gradient(ellipse, rgba(245, 200, 66, 0.3), transparent);
+    pointer-events: none;
+  }
+
+  /* === RABBITS & HATS (Magic shop) === */
+  .rabbits .building-body {
+    width: 160px;
+    height: 200px;
+  }
+  .rh-base {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    width: 140px;
+    height: 120px;
+    background: #6a5acd;
+    border: 4px solid #4b3d8f;
+  }
+  .rh-tower {
+    position: absolute;
+    bottom: 120px;
+    left: 30px;
+    width: 100px;
+    height: 40px;
+    background: #5a4abf;
+    border: 4px solid #4b3d8f;
+    border-bottom: none;
+  }
+  .rh-turret {
+    position: absolute;
+    bottom: 156px;
+    left: 55px;
+    width: 50px;
+    height: 30px;
+    background: #4b3d8f;
+  }
+  .rh-turret::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 24px solid #6a5acd;
+  }
+  .rh-flag {
+    position: absolute;
+    bottom: 200px;
+    left: 78px;
+    width: 4px;
+    height: 20px;
+    background: #4b3d8f;
+  }
+  .rh-flag::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 4px;
+    width: 16px;
+    height: 10px;
+    background: #f5c842;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+
+  .rh-window {
+    position: absolute;
+    width: 24px;
+    height: 32px;
+    background: #9b8ee8;
+    border: 3px solid #4b3d8f;
+    border-radius: 12px 12px 0 0;
+    box-shadow: inset 0 0 8px rgba(200, 180, 255, 0.4);
+  }
+  .rh-window-1 { bottom: 55px; left: 25px; }
+  .rh-window-2 { bottom: 55px; right: 25px; }
+  .rh-window-top { bottom: 130px; left: 50%; transform: translateX(-50%); width: 20px; height: 24px; }
+
+  .rabbits .door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 44px;
+    background: #4b3d8f;
+    border: 3px solid #6a5acd;
+    border-bottom: none;
+    border-radius: 15px 15px 0 0;
+    transition: all 0.3s ease;
+  }
+  .rabbits .door::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    right: 5px;
+    width: 5px;
+    height: 5px;
+    background: #f5c842;
+    border-radius: 50%;
+  }
+
+  /* Scaffolding */
+  .scaffolding {
+    position: absolute;
+    right: -20px;
+    bottom: 0;
+    width: 24px;
+    height: 140px;
+    pointer-events: none;
+  }
+  .scaffold-pole {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    background: #8b7355;
+  }
+  .scaffold-pole:first-child { left: 0; }
+  .scaffold-pole:last-child { right: 0; }
+  .scaffold-plank {
+    position: absolute;
+    left: 0;
+    width: 24px;
+    height: 4px;
+    background: #a08060;
+  }
+  .scaffold-plank:nth-child(3) { bottom: 40px; }
+  .scaffold-plank:nth-child(4) { bottom: 80px; }
+  .scaffold-plank:nth-child(5) { bottom: 120px; }
+
+  /* Sparkles */
+  .sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    pointer-events: none;
+    animation: sparkle-float 2s ease-in-out infinite;
+  }
+  .sparkle::before, .sparkle::after {
+    content: '';
+    position: absolute;
+    background: #f5e066;
+  }
+  .sparkle::before {
+    width: 6px; height: 2px; top: 2px; left: 0;
+  }
+  .sparkle::after {
+    width: 2px; height: 6px; top: 0; left: 2px;
+  }
+  .sparkle:nth-child(8) { top: 10px; left: 10px; animation-delay: 0s; }
+  .sparkle:nth-child(9) { top: 30px; right: 5px; animation-delay: 0.6s; }
+  .sparkle:nth-child(10) { top: 50px; left: 30px; animation-delay: 1.2s; }
+  .sparkle:nth-child(11) { top: -5px; left: 60px; animation-delay: 0.3s; }
+  .sparkle:nth-child(12) { top: 15px; right: 25px; animation-delay: 0.9s; }
+
+  @keyframes sparkle-float {
+    0%, 100% { opacity: 0.3; transform: scale(0.6); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* === CHARACTERS === */
+  .characters {
+    position: absolute;
+    bottom: -12px;
+    left: 0;
+    right: 0;
+    height: 24px;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .character {
+    position: absolute;
+    bottom: 0;
+  }
+  /* Pixel character built with divs */
+  .char-head {
+    width: 8px;
+    height: 8px;
+    margin: 0 auto;
+  }
+  .char-body {
+    width: 8px;
+    height: 10px;
+    margin: 0 auto;
+  }
+  .char-legs {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+  }
+  .char-leg {
+    width: 3px;
+    height: 6px;
+  }
+
+  .character-1 {
+    animation: walk-right 12s linear infinite;
+  }
+  .character-1 .char-head { background: #f5c9a0; }
+  .character-1 .char-body { background: #e85050; }
+  .character-1 .char-leg { background: #444; animation: step 0.4s ease infinite alternate; }
+
+  .character-2 {
+    animation: walk-left 15s linear infinite;
+    animation-delay: -5s;
+  }
+  .character-2 .char-head { background: #d4a574; }
+  .character-2 .char-body { background: #5080e8; }
+  .character-2 .char-leg { background: #333; animation: step 0.35s ease infinite alternate; }
+
+  .character-3 {
+    animation: walk-right 18s linear infinite;
+    animation-delay: -8s;
+  }
+  .character-3 .char-head { background: #f0d0a0; }
+  .character-3 .char-body { background: #50b850; }
+  .character-3 .char-leg { background: #555; animation: step 0.45s ease infinite alternate; }
+
+  @keyframes walk-right {
+    0% { left: -20px; }
+    100% { left: calc(100% + 20px); }
+  }
+  @keyframes walk-left {
+    0% { left: calc(100% + 20px); transform: scaleX(-1); }
+    100% { left: -20px; transform: scaleX(-1); }
+  }
+  @keyframes step {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-2px); }
+  }
+
+  /* === BIRDS === */
+  .bird {
+    position: absolute;
+    pointer-events: none;
+  }
+  .bird::before, .bird::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 3px;
+    background: #2d1b4e;
+    border-radius: 50% 50% 0 0;
+  }
+  .bird::before {
+    transform: rotate(-20deg);
+    left: 0;
+  }
+  .bird::after {
+    transform: rotate(20deg);
+    left: 7px;
+  }
+  .bird-1 {
+    top: 30%;
+    animation: fly-bird 8s linear infinite;
+  }
+  .bird-2 {
+    top: 26%;
+    animation: fly-bird 10s linear infinite;
+    animation-delay: -4s;
+  }
+  .bird-3 {
+    top: 34%;
+    animation: fly-bird 7s linear infinite;
+    animation-delay: -2s;
+  }
+  @keyframes fly-bird {
+    0% { left: -30px; }
+    100% { left: calc(100% + 30px); }
+  }
+
+  /* === TREES === */
+  .tree {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .tree-trunk {
+    width: 12px;
+    height: 24px;
+    background: #6b4226;
+    margin: 0 auto;
+  }
+  .tree-top {
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 30px solid #2e7d32;
+    margin: 0 auto;
+  }
+  .tree-top-2 {
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 24px solid #388e3c;
+    margin: -10px auto 0;
+  }
+
+  .tree-1 { bottom: 82%; left: 5%; }
+  .tree-2 { bottom: 82%; right: 8%; transform: scale(0.8); }
+  .tree-3 { bottom: 82%; left: 15%; transform: scale(0.6); }
+  .tree-4 { bottom: 82%; right: 18%; transform: scale(0.7); }
+
+  /* === GROUND DETAILS === */
+  .grass-tuft {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .grass-tuft::before {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 8px;
+    background: #6abf50;
+    left: 0;
+    transform: rotate(-10deg);
+  }
+  .grass-tuft::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 6px;
+    background: #5da64a;
+    left: 5px;
+    transform: rotate(10deg);
+  }
+
+  /* === FOOTER === */
+  .footer {
+    width: 100%;
+    text-align: center;
+    padding: 24px 16px 16px;
+    position: relative;
+    z-index: 10;
+    margin-top: auto;
+  }
+  .footer-border {
+    height: 8px;
+    margin-bottom: 16px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--path-color) 0px,
+      var(--path-color) 8px,
+      var(--path-dark) 8px,
+      var(--path-dark) 16px
+    );
+  }
+  .footer p {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 2px;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 680px) {
+    .village {
+      gap: 24px;
+    }
+    .chambre-froide .building-body,
+    .hotplate .building-body,
+    .rabbits .building-body {
+      transform: scale(0.8);
+      transform-origin: bottom center;
+    }
+    .sun {
+      width: 40px;
+      height: 40px;
+    }
+  }
+  @media (max-width: 480px) {
+    .chambre-froide .building-body,
+    .hotplate .building-body,
+    .rabbits .building-body {
+      transform: scale(0.65);
+      transform-origin: bottom center;
+    }
+    .village {
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="sky">
+
+  <!-- Stars -->
+  <div class="stars">
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div>
+  </div>
+
+  <!-- Clouds -->
+  <div class="cloud cloud-1"><div class="block"></div><div class="block"></div><div class="block"></div></div>
+  <div class="cloud cloud-2"><div class="block"></div><div class="block"></div><div class="block"></div></div>
+  <div class="cloud cloud-3"><div class="block"></div><div class="block"></div><div class="block"></div></div>
+
+  <!-- Sun -->
+  <div class="sun"></div>
+
+  <!-- Birds -->
+  <div class="bird bird-1"></div>
+  <div class="bird bird-2"></div>
+  <div class="bird bird-3"></div>
+
+  <!-- Trees -->
+  <div class="tree tree-1"><div class="tree-top-2"></div><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree tree-2"><div class="tree-top-2"></div><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree tree-3"><div class="tree-top-2"></div><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree tree-4"><div class="tree-top-2"></div><div class="tree-top"></div><div class="tree-trunk"></div></div>
+
+  <!-- Header -->
+  <header class="header">
+    <h1>FLY AGILE GAMES</h1>
+    <p class="subtitle">Welcome to the village - choose your adventure!</p>
+  </header>
+
+  <!-- Village -->
+  <div class="village">
+
+    <!-- Path -->
+    <div class="path-container">
+      <div class="path-road"></div>
+    </div>
+
+    <!-- Characters walking on the path -->
+    <div class="characters">
+      <div class="character character-1">
+        <div class="char-head"></div>
+        <div class="char-body"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
+      <div class="character character-2">
+        <div class="char-head"></div>
+        <div class="char-body"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
+      <div class="character character-3">
+        <div class="char-head"></div>
+        <div class="char-body"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
+    </div>
+
+    <!-- La Chambre Froide -->
+    <a href="https://chambre-froide.flyagile.com" class="building chambre-froide" title="La Chambre Froide">
+      <div class="building-body">
+        <div class="cf-roof"></div>
+        <div class="cf-base"></div>
+        <div class="cf-icicle"></div>
+        <div class="cf-icicle"></div>
+        <div class="cf-icicle"></div>
+        <div class="cf-icicle"></div>
+        <div class="cf-icicle"></div>
+        <div class="cf-window cf-window-1"></div>
+        <div class="cf-window cf-window-2"></div>
+        <div class="door"></div>
+        <!-- Snowflakes -->
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+      </div>
+      <div class="building-label">
+        La Chambre Froide
+        <br><span class="status-badge status-live">LIVE</span>
+      </div>
+    </a>
+
+    <!-- Hotplate -->
+    <a href="https://hotplate.flyagile.com" class="building hotplate" title="Hotplate">
+      <div class="building-body">
+        <div class="hp-chimney"></div>
+        <div class="hp-roof"></div>
+        <div class="hp-base"></div>
+        <div class="hp-awning"></div>
+        <div class="hp-window hp-window-1"></div>
+        <div class="hp-window hp-window-2"></div>
+        <div class="hp-sign">OPEN</div>
+        <div class="door"></div>
+        <!-- Smoke -->
+        <div class="smoke-particle"></div>
+        <div class="smoke-particle"></div>
+        <div class="smoke-particle"></div>
+      </div>
+      <div class="building-label">
+        Hotplate
+        <br><span class="status-badge status-live">LIVE</span>
+      </div>
+    </a>
+
+    <!-- Rabbits & Hats -->
+    <a href="#" onclick="event.preventDefault(); alert('Coming soon! Rabbits & Hats is under construction.')" class="building rabbits" title="Rabbits &amp; Hats - Coming Soon">
+      <div class="building-body">
+        <div class="rh-flag"></div>
+        <div class="rh-turret"></div>
+        <div class="rh-tower"></div>
+        <div class="rh-base"></div>
+        <div class="rh-window rh-window-1"></div>
+        <div class="rh-window rh-window-2"></div>
+        <div class="rh-window rh-window-top"></div>
+        <div class="door"></div>
+        <!-- Sparkles -->
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <!-- Scaffolding -->
+        <div class="scaffolding">
+          <div class="scaffold-pole"></div>
+          <div class="scaffold-pole" style="right:0;left:auto"></div>
+          <div class="scaffold-plank"></div>
+          <div class="scaffold-plank"></div>
+          <div class="scaffold-plank"></div>
+        </div>
+      </div>
+      <div class="building-label">
+        Rabbits &amp; Hats
+        <br><span class="status-badge status-soon">COMING SOON</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-border"></div>
+    <p>&copy; 2026 Fly Agile</p>
+  </footer>
+
+</div>
+</body>
+</html>

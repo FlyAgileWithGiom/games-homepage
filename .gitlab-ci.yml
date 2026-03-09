@@ -1,0 +1,80 @@
+stages:
+  - deploy
+
+deploy-production:
+  stage: deploy
+  image: docker:24
+  services:
+    - docker:24-dind
+  only:
+    - tags
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    NAMESPACE_NAME: "games-homepage"
+    IMAGE_NAME: "games-homepage"
+    REGION: "fr-par"
+  before_script:
+    - apk add --no-cache curl jq bash
+    # Install Scaleway CLI
+    - curl -o /usr/local/bin/scw -L "https://github.com/scaleway/scaleway-cli/releases/download/v2.36.0/scaleway-cli_2.36.0_linux_amd64"
+    - chmod +x /usr/local/bin/scw
+  script:
+    - echo "Building Docker image..."
+    - docker build -t ${IMAGE_NAME}:${CI_COMMIT_TAG} -t ${IMAGE_NAME}:latest .
+
+    # Get registry endpoint from Scaleway
+    - |
+      CONTAINER_NS=$(scw container namespace list region=${REGION} -o json \
+        | jq -r ".[] | select(.name==\"${NAMESPACE_NAME}\")")
+
+      if [ -z "$CONTAINER_NS" ] || [ "$CONTAINER_NS" = "null" ]; then
+        echo "Creating container namespace..."
+        scw container namespace create \
+          name=${NAMESPACE_NAME} \
+          region=${REGION} \
+          project-id=${SCW_DEFAULT_PROJECT_ID}
+        sleep 5
+        CONTAINER_NS=$(scw container namespace list region=${REGION} -o json \
+          | jq -r ".[] | select(.name==\"${NAMESPACE_NAME}\")")
+      fi
+
+      CONTAINER_NAMESPACE_ID=$(echo "$CONTAINER_NS" | jq -r ".id")
+      REGISTRY_ENDPOINT=$(echo "$CONTAINER_NS" | jq -r ".registry_endpoint")
+      echo "Namespace ID: ${CONTAINER_NAMESPACE_ID}"
+      echo "Registry: ${REGISTRY_ENDPOINT}"
+
+    # Push to Scaleway registry
+    - echo ${SCW_SECRET_KEY} | docker login rg.fr-par.scw.cloud -u nologin --password-stdin
+    - docker tag ${IMAGE_NAME}:latest ${REGISTRY_ENDPOINT}/${IMAGE_NAME}:latest
+    - docker tag ${IMAGE_NAME}:${CI_COMMIT_TAG} ${REGISTRY_ENDPOINT}/${IMAGE_NAME}:${CI_COMMIT_TAG}
+    - docker push ${REGISTRY_ENDPOINT}/${IMAGE_NAME}:latest
+    - docker push ${REGISTRY_ENDPOINT}/${IMAGE_NAME}:${CI_COMMIT_TAG}
+
+    # Deploy or update container
+    - |
+      EXISTING=$(scw container container list namespace-id=${CONTAINER_NAMESPACE_ID} region=${REGION} -o json \
+        | jq -r ".[] | select(.name==\"${IMAGE_NAME}\") | .id")
+
+      if [ -z "$EXISTING" ] || [ "$EXISTING" = "null" ]; then
+        echo "Creating new container..."
+        scw container container create \
+          namespace-id=${CONTAINER_NAMESPACE_ID} \
+          name=${IMAGE_NAME} \
+          registry-image=${REGISTRY_ENDPOINT}/${IMAGE_NAME}:latest \
+          port=80 \
+          min-scale=0 \
+          max-scale=5 \
+          memory-limit=128 \
+          region=${REGION}
+      else
+        echo "Updating existing container..."
+        scw container container update \
+          container-id=${EXISTING} \
+          registry-image=${REGISTRY_ENDPOINT}/${IMAGE_NAME}:latest \
+          region=${REGION}
+        scw container container deploy ${EXISTING} region=${REGION}
+      fi
+
+    - echo "Deployment complete for tag ${CI_COMMIT_TAG}"
+  environment:
+    name: production

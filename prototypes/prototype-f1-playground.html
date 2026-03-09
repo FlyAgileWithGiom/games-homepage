@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fly Agile Games - Pixel Playground</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Silkscreen', cursive;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    image-rendering: pixelated;
+  }
+
+  /* === SKY & GROUND === */
+  .scene {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #c8e6ff 0%, #e8d8c8 55%, #d4e8b8 55%, #b8d898 100%);
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* Grass texture line */
+  .scene::after {
+    content: '';
+    position: absolute;
+    top: 55%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, #90c060 0px, #90c060 8px, #a8d878 8px, #a8d878 16px);
+  }
+
+  /* === SLOW CLOUD === */
+  .cloud {
+    position: absolute;
+    top: 8%;
+    left: -120px;
+    animation: drift 120s linear infinite;
+    opacity: 0.5;
+  }
+  .cloud-body {
+    width: 80px;
+    height: 24px;
+    background: #fff;
+    border-radius: 0;
+    position: relative;
+    /* pixel cloud shape */
+    box-shadow:
+      8px -8px 0 0 #fff,
+      16px -8px 0 0 #fff,
+      24px -8px 0 0 #fff,
+      32px -8px 0 0 #fff,
+      16px -16px 0 0 #fff,
+      24px -16px 0 0 #fff,
+      40px -8px 0 0 #fff,
+      48px -8px 0 0 #fff,
+      48px 0 0 0 #fff,
+      56px 0 0 0 #fff;
+  }
+
+  .cloud2 {
+    top: 14%;
+    animation-delay: -60s;
+    animation-duration: 160s;
+    opacity: 0.35;
+  }
+  .cloud2 .cloud-body {
+    transform: scale(0.7);
+  }
+
+  @keyframes drift {
+    from { left: -140px; }
+    to { left: 110%; }
+  }
+
+  /* === DECORATIVE ELEMENTS === */
+  .decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+  }
+
+  /* Small tree */
+  .tree {
+    position: absolute;
+    top: calc(55% - 72px);
+    left: 8%;
+  }
+  .tree-trunk {
+    width: 12px;
+    height: 24px;
+    background: #8b6840;
+    margin: 0 auto;
+  }
+  .tree-top {
+    width: 8px;
+    height: 8px;
+    background: #58a048;
+    margin: 0 auto;
+    box-shadow:
+      -8px 0 0 #58a048, 8px 0 0 #58a048,
+      -16px 8px 0 #68b058, -8px 8px 0 #68b058, 0 8px 0 #68b058, 8px 8px 0 #68b058, 16px 8px 0 #68b058,
+      -24px 16px 0 #58a048, -16px 16px 0 #58a048, -8px 16px 0 #58a048, 0 16px 0 #58a048, 8px 16px 0 #58a048, 16px 16px 0 #58a048, 24px 16px 0 #58a048,
+      -16px 24px 0 #68b058, -8px 24px 0 #68b058, 0 24px 0 #68b058, 8px 24px 0 #68b058, 16px 24px 0 #68b058;
+  }
+
+  /* Lamppost with bird */
+  .lamppost {
+    position: absolute;
+    top: calc(55% - 88px);
+    right: 10%;
+  }
+  .lamppost-pole {
+    width: 6px;
+    height: 72px;
+    background: #888;
+    margin: 0 auto;
+  }
+  .lamppost-light {
+    width: 20px;
+    height: 8px;
+    background: #aaa;
+    margin: 0 auto;
+    border-bottom: 4px solid #f8e880;
+    position: relative;
+  }
+
+  /* Bird on lamppost */
+  .bird {
+    position: absolute;
+    top: -14px;
+    left: 14px;
+    width: 6px;
+    height: 6px;
+    background: #c06848;
+    box-shadow:
+      6px 0 0 #c06848,
+      -2px -2px 0 #c06848,
+      0 -6px 0 #d87858,
+      6px -6px 0 #d87858,
+      12px -6px 0 #d87858,
+      0 -4px 0 #d87858,
+      6px -4px 0 #d87858,
+      -6px -4px 0 #f8d848;
+    animation: bird-bob 4s ease-in-out infinite;
+  }
+  @keyframes bird-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  /* Bench */
+  .bench {
+    position: absolute;
+    top: calc(55% - 16px);
+    left: 18%;
+  }
+  .bench-seat {
+    width: 40px;
+    height: 6px;
+    background: #a07040;
+    box-shadow: 0 -6px 0 #b08050;
+  }
+  .bench-legs {
+    display: flex;
+    justify-content: space-between;
+    width: 40px;
+  }
+  .bench-leg {
+    width: 6px;
+    height: 12px;
+    background: #806030;
+  }
+
+  /* Path (subtle) */
+  .path {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    max-width: 900px;
+    height: 20px;
+    background: repeating-linear-gradient(90deg, #c8b898 0px, #c8b898 12px, #d0c0a0 12px, #d0c0a0 24px);
+    opacity: 0.6;
+    border-radius: 0;
+  }
+
+  /* Small flowers */
+  .flower {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 0;
+  }
+  .flower-1 { background: #f08080; top: calc(55% + 28px); left: 30%; box-shadow: 0 4px 0 #60a040; }
+  .flower-2 { background: #f0d060; top: calc(55% + 36px); left: 72%; box-shadow: 0 4px 0 #60a040; }
+  .flower-3 { background: #8080f0; top: calc(55% + 24px); right: 22%; box-shadow: 0 4px 0 #60a040; }
+
+  /* === CONTENT === */
+  .content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 32px;
+    flex: 1;
+  }
+
+  /* === HEADER === */
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-size: 2.4rem;
+    color: #5a4a38;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+    margin-bottom: 8px;
+  }
+  .header .subtitle {
+    font-size: 0.85rem;
+    color: #7a6a58;
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+
+  /* === GAME STANDS === */
+  .stands {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 60px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    padding: 0 16px;
+  }
+
+  .stand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    padding: 32px 28px 28px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 4px solid rgba(0,0,0,0.06);
+    border-radius: 0;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+    cursor: pointer;
+    width: 240px;
+    position: relative;
+  }
+  .stand:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    background: rgba(255, 255, 255, 0.75);
+  }
+  .stand.coming-soon {
+    cursor: default;
+    opacity: 0.65;
+  }
+  .stand.coming-soon:hover {
+    transform: none;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  /* Stand awning top */
+  .stand::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: -4px;
+    right: -4px;
+    height: 12px;
+    border-radius: 0;
+  }
+  .stand-cold::before { background: repeating-linear-gradient(90deg, #88bbee 0px, #88bbee 16px, #aaccee 16px, #aaccee 32px); }
+  .stand-hot::before { background: repeating-linear-gradient(90deg, #ee9966 0px, #ee9966 16px, #eebb88 16px, #eebb88 32px); }
+  .stand-rabbit::before { background: repeating-linear-gradient(90deg, #aa88cc 0px, #aa88cc 16px, #ccaaee 16px, #ccaaee 32px); }
+
+  /* Sprite area */
+  .sprite-container {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  /* === PIXEL SPRITES via box-shadow === */
+  .pixel {
+    width: 6px;
+    height: 6px;
+    position: absolute;
+  }
+
+  /* Snowflake / Ice Crystal - La Chambre Froide */
+  .sprite-ice {
+    background: transparent;
+    width: 6px;
+    height: 6px;
+    position: relative;
+    top: -4px;
+    box-shadow:
+      /* Center */
+      0 0 0 #a0d8f0,
+      /* Vertical line */
+      0 -30px 0 #80c0e8, 0 -24px 0 #90cce8, 0 -18px 0 #a0d8f0, 0 -12px 0 #a0d8f0, 0 -6px 0 #b0e0f8,
+      0 6px 0 #b0e0f8, 0 12px 0 #a0d8f0, 0 18px 0 #a0d8f0, 0 24px 0 #90cce8, 0 30px 0 #80c0e8,
+      /* Horizontal line */
+      -30px 0 0 #80c0e8, -24px 0 0 #90cce8, -18px 0 0 #a0d8f0, -12px 0 0 #a0d8f0, -6px 0 0 #b0e0f8,
+      6px 0 0 #b0e0f8, 12px 0 0 #a0d8f0, 18px 0 0 #a0d8f0, 24px 0 0 #90cce8, 30px 0 0 #80c0e8,
+      /* Diagonal top-left to bottom-right */
+      -24px -24px 0 #80c0e8, -18px -18px 0 #90cce8, -12px -12px 0 #a0d8f0, -6px -6px 0 #b0e0f8,
+      6px 6px 0 #b0e0f8, 12px 12px 0 #a0d8f0, 18px 18px 0 #90cce8, 24px 24px 0 #80c0e8,
+      /* Diagonal top-right to bottom-left */
+      24px -24px 0 #80c0e8, 18px -18px 0 #90cce8, 12px -12px 0 #a0d8f0, 6px -6px 0 #b0e0f8,
+      -6px 6px 0 #b0e0f8, -12px 12px 0 #a0d8f0, -18px 18px 0 #90cce8, -24px 24px 0 #80c0e8,
+      /* Branch tips */
+      -30px -6px 0 #70b8e0, -30px 6px 0 #70b8e0,
+      30px -6px 0 #70b8e0, 30px 6px 0 #70b8e0,
+      -6px -30px 0 #70b8e0, 6px -30px 0 #70b8e0,
+      -6px 30px 0 #70b8e0, 6px 30px 0 #70b8e0,
+      /* Inner sparkle */
+      -12px -6px 0 #c8e8ff, 12px -6px 0 #c8e8ff,
+      -12px 6px 0 #c8e8ff, 12px 6px 0 #c8e8ff,
+      -6px -12px 0 #c8e8ff, 6px -12px 0 #c8e8ff,
+      -6px 12px 0 #c8e8ff, 6px 12px 0 #c8e8ff;
+  }
+
+  /* Frying Pan - Hotplate */
+  .sprite-pan {
+    background: transparent;
+    width: 6px;
+    height: 6px;
+    position: relative;
+    top: 4px;
+    box-shadow:
+      /* Pan base - dark circle */
+      -12px 0 0 #555, -6px 0 0 #666, 0 0 0 #666, 6px 0 0 #666, 12px 0 0 #555,
+      -18px -6px 0 #555, -12px -6px 0 #777, -6px -6px 0 #888, 0 -6px 0 #888, 6px -6px 0 #888, 12px -6px 0 #777, 18px -6px 0 #555,
+      -18px 6px 0 #555, -12px 6px 0 #777, -6px 6px 0 #888, 0 6px 0 #888, 6px 6px 0 #888, 12px 6px 0 #777, 18px 6px 0 #555,
+      -18px -12px 0 #555, -12px -12px 0 #777, -6px -12px 0 #888, 0 -12px 0 #888, 6px -12px 0 #888, 12px -12px 0 #777, 18px -12px 0 #555,
+      -18px 12px 0 #555, -12px 12px 0 #777, -6px 12px 0 #888, 0 12px 0 #888, 6px 12px 0 #888, 12px 12px 0 #777, 18px 12px 0 #555,
+      -12px -18px 0 #555, -6px -18px 0 #666, 0 -18px 0 #666, 6px -18px 0 #666, 12px -18px 0 #555,
+      -12px 18px 0 #555, -6px 18px 0 #666, 0 18px 0 #666, 6px 18px 0 #666, 12px 18px 0 #555,
+      /* Pan interior highlight */
+      -6px -6px 0 #999, 0 -12px 0 #999, -12px -6px 0 #999,
+      /* Handle */
+      24px 0 0 #8b6840, 30px 0 0 #a07040, 36px 0 0 #a07040, 42px 0 0 #a07040, 48px 0 0 #8b6840,
+      24px -6px 0 #8b6840, 30px -6px 0 #b08050, 36px -6px 0 #b08050, 42px -6px 0 #b08050, 48px -6px 0 #8b6840,
+      /* Small flame under pan */
+      -6px 24px 0 #f08030, 0 24px 0 #f0a040, 6px 24px 0 #f08030,
+      -6px 30px 0 #f0c040, 0 30px 0 #f0d060, 6px 30px 0 #f0c040,
+      0 36px 0 #f0d878,
+      /* Food in pan */
+      -6px -6px 0 #e8c060, 6px -6px 0 #d0a848,
+      -6px 6px 0 #c89840, 6px 6px 0 #e8c060,
+      0 0 0 #f0d878;
+  }
+
+  /* Rabbit in Hat - Rabbits & Hats */
+  .sprite-rabbit {
+    background: transparent;
+    width: 6px;
+    height: 6px;
+    position: relative;
+    top: -6px;
+    box-shadow:
+      /* Hat brim */
+      -24px 18px 0 #5a3a7a, -18px 18px 0 #6a4a8a, -12px 18px 0 #6a4a8a, -6px 18px 0 #6a4a8a,
+      0 18px 0 #6a4a8a, 6px 18px 0 #6a4a8a, 12px 18px 0 #6a4a8a, 18px 18px 0 #6a4a8a, 24px 18px 0 #5a3a7a,
+      /* Hat body */
+      -18px 12px 0 #7a5a9a, -12px 12px 0 #8a6aaa, -6px 12px 0 #8a6aaa, 0 12px 0 #8a6aaa, 6px 12px 0 #8a6aaa, 12px 12px 0 #8a6aaa, 18px 12px 0 #7a5a9a,
+      -18px 6px 0 #7a5a9a, -12px 6px 0 #8a6aaa, -6px 6px 0 #9a7aba, 0 6px 0 #9a7aba, 6px 6px 0 #9a7aba, 12px 6px 0 #8a6aaa, 18px 6px 0 #7a5a9a,
+      -18px 0 0 #7a5a9a, -12px 0 0 #8a6aaa, -6px 0 0 #9a7aba, 0 0 0 #9a7aba, 6px 0 0 #9a7aba, 12px 0 0 #8a6aaa, 18px 0 0 #7a5a9a,
+      /* Hat band */
+      -18px -6px 0 #f0d060, -12px -6px 0 #f0d878, -6px -6px 0 #f0d878, 0 -6px 0 #f0d878, 6px -6px 0 #f0d878, 12px -6px 0 #f0d878, 18px -6px 0 #f0d060,
+      /* Rabbit head popping out */
+      -12px -12px 0 #f0e8e0, -6px -12px 0 #f8f0e8, 0 -12px 0 #f8f0e8, 6px -12px 0 #f8f0e8, 12px -12px 0 #f0e8e0,
+      -12px -18px 0 #f0e8e0, -6px -18px 0 #f8f0e8, 0 -18px 0 #f8f0e8, 6px -18px 0 #f8f0e8, 12px -18px 0 #f0e8e0,
+      -6px -24px 0 #f0e8e0, 0 -24px 0 #f8f0e8, 6px -24px 0 #f0e8e0,
+      /* Rabbit ears */
+      -6px -30px 0 #f0e8e0, -6px -36px 0 #f0e8e0, -6px -42px 0 #f0e8e0, -6px -48px 0 #f0e8e0,
+      6px -30px 0 #f0e8e0, 6px -36px 0 #f0e8e0, 6px -42px 0 #f0e8e0, 6px -48px 0 #f0e8e0,
+      /* Ear inner */
+      -6px -36px 0 #f0c0c0, -6px -42px 0 #f0c0c0,
+      6px -36px 0 #f0c0c0, 6px -42px 0 #f0c0c0,
+      /* Eyes */
+      -6px -18px 0 #333, 6px -18px 0 #333,
+      /* Nose */
+      0 -14px 0 #e8a0a0,
+      /* Hat top */
+      -18px -6px 0 #6a4a8a, -12px -6px 0 #6a4a8a, 12px -6px 0 #6a4a8a, 18px -6px 0 #6a4a8a;
+  }
+
+  /* === STAND TEXT === */
+  .stand-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4a3a28;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .stand-cold .stand-name { color: #3a6a8a; }
+  .stand-hot .stand-name { color: #8a4a2a; }
+  .stand-rabbit .stand-name { color: #5a3a7a; }
+
+  .stand-tagline {
+    font-size: 0.7rem;
+    color: #8a7a68;
+    text-align: center;
+    margin-bottom: 14px;
+    font-weight: 400;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .badge-live {
+    background: #60a848;
+    color: #fff;
+  }
+  .badge-soon {
+    background: #bbb;
+    color: #fff;
+  }
+
+  /* === FOOTER === */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 0.65rem;
+    color: #9a8a78;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 860px) {
+    .stands {
+      gap: 32px;
+    }
+    .stand {
+      width: 200px;
+      padding: 24px 20px 24px;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stands {
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+    .stand {
+      width: 260px;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+    }
+    .tree, .bench { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="scene">
+
+  <!-- Clouds -->
+  <div class="cloud"><div class="cloud-body"></div></div>
+  <div class="cloud cloud2"><div class="cloud-body"></div></div>
+
+  <!-- Decorations -->
+  <div class="decorations">
+    <div class="tree">
+      <div class="tree-top"></div>
+      <div class="tree-trunk"></div>
+    </div>
+    <div class="lamppost">
+      <div class="lamppost-light">
+        <div class="bird"></div>
+      </div>
+      <div class="lamppost-pole"></div>
+    </div>
+    <div class="bench">
+      <div class="bench-seat"></div>
+      <div class="bench-legs">
+        <div class="bench-leg"></div>
+        <div class="bench-leg"></div>
+      </div>
+    </div>
+    <div class="path"></div>
+    <div class="flower flower-1"></div>
+    <div class="flower flower-2"></div>
+    <div class="flower flower-3"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <header class="header">
+      <h1>Fly Agile Games</h1>
+      <p class="subtitle">Des jeux collaboratifs pour vos equipes</p>
+    </header>
+
+    <div class="stands">
+      <!-- La Chambre Froide -->
+      <a href="https://chambre-froide.flyagile.com" class="stand stand-cold">
+        <div class="sprite-container">
+          <div class="pixel sprite-ice"></div>
+        </div>
+        <div class="stand-name">La Chambre Froide</div>
+        <div class="stand-tagline">Puzzle mathematique</div>
+        <span class="badge badge-live">LIVE</span>
+      </a>
+
+      <!-- Hotplate -->
+      <a href="https://hotplate.flyagile.com" class="stand stand-hot">
+        <div class="sprite-container">
+          <div class="pixel sprite-pan"></div>
+        </div>
+        <div class="stand-name">Hotplate</div>
+        <div class="stand-tagline">Cuisine collaborative</div>
+        <span class="badge badge-live">LIVE</span>
+      </a>
+
+      <!-- Rabbits & Hats -->
+      <div class="stand stand-rabbit coming-soon">
+        <div class="sprite-container">
+          <div class="pixel sprite-rabbit"></div>
+        </div>
+        <div class="stand-name">Rabbits & Hats</div>
+        <div class="stand-tagline">Strategie multijoueur</div>
+        <span class="badge badge-soon">COMING SOON</span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">&copy; 2026 Fly Agile</footer>
+</div>
+</body>
+</html>

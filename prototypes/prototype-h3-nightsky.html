@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fly Agile Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Silkscreen', cursive;
+    background: #0e0e2c;
+    color: #fff;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  .scene {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- SKY --- */
+  .sky {
+    position: relative;
+    background: linear-gradient(180deg, #1a1a3e 0%, #2d1b69 60%, #3a2570 100%);
+    flex: 1;
+    min-height: 420px;
+    overflow: hidden;
+  }
+
+  /* Stars */
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    image-rendering: pixelated;
+    animation: twinkle var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+    opacity: 0.3;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+
+  /* Clouds */
+  .cloud {
+    position: absolute;
+    opacity: 0.08;
+    image-rendering: pixelated;
+  }
+
+  .cloud-1 {
+    top: 60px;
+    animation: drift-cloud 90s linear infinite;
+  }
+
+  .cloud-2 {
+    top: 110px;
+    animation: drift-cloud 100s linear infinite reverse;
+    animation-delay: -40s;
+  }
+
+  @keyframes drift-cloud {
+    0% { left: -120px; }
+    100% { left: calc(100% + 120px); }
+  }
+
+  /* Cloud pixel art via box-shadow */
+  .cloud::after {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    background: transparent;
+    box-shadow:
+      0px 0px 0 8px #fff,
+      8px 0px 0 8px #fff,
+      16px 0px 0 8px #fff,
+      24px 0px 0 8px #fff,
+      32px 0px 0 8px #fff,
+      40px 0px 0 8px #fff,
+      -8px 8px 0 8px #fff,
+      0px 8px 0 8px #fff,
+      8px 8px 0 8px #fff,
+      16px 8px 0 8px #fff,
+      24px 8px 0 8px #fff,
+      32px 8px 0 8px #fff,
+      40px 8px 0 8px #fff,
+      48px 8px 0 8px #fff,
+      8px -8px 0 8px #fff,
+      16px -8px 0 8px #fff,
+      32px -8px 0 8px #fff;
+    image-rendering: pixelated;
+  }
+
+  /* Moon */
+  .moon {
+    position: absolute;
+    top: 40px;
+    right: 80px;
+    width: 8px;
+    height: 8px;
+    image-rendering: pixelated;
+  }
+
+  .moon::after {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: transparent;
+    box-shadow:
+      6px 0px 0 6px #ffe8a0,
+      12px 0px 0 6px #ffe8a0,
+      18px 0px 0 6px #ffe8a0,
+      0px 6px 0 6px #ffe8a0,
+      6px 6px 0 6px #fff8dc,
+      12px 6px 0 6px #fff8dc,
+      18px 6px 0 6px #ffe8a0,
+      24px 6px 0 6px #ffe8a0,
+      0px 12px 0 6px #ffe8a0,
+      6px 12px 0 6px #fff8dc,
+      12px 12px 0 6px #fff8dc,
+      18px 12px 0 6px #ffe8a0,
+      24px 12px 0 6px #ffe8a0,
+      0px 18px 0 6px #ffe8a0,
+      6px 18px 0 6px #fff8dc,
+      12px 18px 0 6px #ffe8a0,
+      18px 18px 0 6px #ffe8a0,
+      6px 24px 0 6px #ffe8a0,
+      12px 24px 0 6px #ffe8a0,
+      18px 24px 0 6px #ffe8a0;
+    image-rendering: pixelated;
+  }
+
+  .moon-glow {
+    position: absolute;
+    top: 25px;
+    right: 60px;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(255,232,160,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* --- HEADER --- */
+  .header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 48px 20px 8px;
+  }
+
+  .header h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.15), 0 2px 0 rgba(0,0,0,0.3);
+  }
+
+  .header p {
+    font-size: 0.75rem;
+    color: #4CAF50;
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* --- GROUND --- */
+  .ground-area {
+    position: relative;
+    z-index: 5;
+  }
+
+  .buildings-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 40px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 5;
+  }
+
+  .building-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.4s ease;
+  }
+
+  .building-wrapper:hover {
+    transform: translateY(-6px);
+  }
+
+  .building-wrapper.locked {
+    cursor: default;
+    opacity: 0.75;
+  }
+
+  .building-wrapper.locked:hover {
+    transform: none;
+  }
+
+  .building {
+    image-rendering: pixelated;
+    position: relative;
+  }
+
+  /* Grass ground */
+  .grass {
+    background: linear-gradient(180deg, #2d5a27 0%, #1e4a1a 50%, #163d13 100%);
+    padding: 10px 0 0;
+    position: relative;
+    z-index: 4;
+  }
+
+  .grass-top {
+    height: 12px;
+    background: repeating-linear-gradient(
+      90deg,
+      #3a7a32 0px, #3a7a32 8px,
+      #2d5a27 8px, #2d5a27 16px,
+      #4CAF50 16px, #4CAF50 24px,
+      #2d5a27 24px, #2d5a27 32px
+    );
+    image-rendering: pixelated;
+  }
+
+  /* Pixel path */
+  .path {
+    height: 16px;
+    margin: 0 auto;
+    width: 80%;
+    background: repeating-linear-gradient(
+      90deg,
+      #8B7355 0px, #8B7355 16px,
+      #7a6548 16px, #7a6548 32px
+    );
+    border-top: 2px solid #9a8565;
+    border-bottom: 2px solid #6a5538;
+    image-rendering: pixelated;
+  }
+
+  /* --- GAME INFO CARDS --- */
+  .info-section {
+    background: linear-gradient(180deg, #163d13 0%, #0e2e0b 100%);
+    padding: 30px 20px 10px;
+    position: relative;
+    z-index: 4;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .info-card {
+    flex: 1;
+    max-width: 280px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .info-card.locked {
+    opacity: 0.6;
+  }
+
+  .sprite-icon {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    position: relative;
+  }
+
+  .info-text {
+    flex: 1;
+  }
+
+  .info-text h3 {
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .info-text h3.cyan { color: #88e0ef; }
+  .info-text h3.amber { color: #f0a830; }
+  .info-text h3.purple { color: #c488ef; }
+
+  .info-text p {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-dot.live {
+    background: #4CAF50;
+    box-shadow: 0 0 6px rgba(76,175,80,0.6);
+  }
+
+  .status-dot.soon {
+    background: #666;
+  }
+
+  .status.live { color: #4CAF50; }
+  .status.soon { color: #888; }
+
+  /* --- SPARKLES near castle --- */
+  .sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #c488ef;
+    border-radius: 50%;
+    animation: sparkle-fade 4s ease-in-out infinite;
+    opacity: 0;
+    image-rendering: pixelated;
+  }
+
+  @keyframes sparkle-fade {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+  }
+
+  /* --- SMOKE --- */
+  .smoke-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(200,200,200,0.3);
+    border-radius: 50%;
+    animation: smoke-rise var(--dur) ease-out infinite;
+    animation-delay: var(--delay);
+    opacity: 0;
+  }
+
+  @keyframes smoke-rise {
+    0% { opacity: 0; transform: translateY(0) scale(1); }
+    20% { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(-40px) translateX(8px) scale(2); }
+  }
+
+  /* Door glow on hover */
+  .building-wrapper:not(.locked):hover .door-glow {
+    opacity: 1;
+  }
+
+  .door-glow {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  /* --- FOOTER --- */
+  footer {
+    background: #0a1f08;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 1px;
+  }
+
+  /* --- BUILDING PIXEL ART (CSS box-shadow) --- */
+
+  /* La Chambre Froide */
+  .building-chambre {
+    width: 8px;
+    height: 8px;
+    position: relative;
+  }
+
+  .building-chambre::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    image-rendering: pixelated;
+    box-shadow:
+      /* Triangular roof with snow */
+      36px 0px 0 4px #e8e8f0,
+      32px 4px 0 4px #e8e8f0,
+      36px 4px 0 4px #5a6a7a,
+      40px 4px 0 4px #e8e8f0,
+      28px 8px 0 4px #e8e8f0,
+      32px 8px 0 4px #5a6a7a,
+      36px 8px 0 4px #5a6a7a,
+      40px 8px 0 4px #5a6a7a,
+      44px 8px 0 4px #e8e8f0,
+      24px 12px 0 4px #5a6a7a,
+      28px 12px 0 4px #5a6a7a,
+      32px 12px 0 4px #5a6a7a,
+      36px 12px 0 4px #5a6a7a,
+      40px 12px 0 4px #5a6a7a,
+      44px 12px 0 4px #5a6a7a,
+      48px 12px 0 4px #5a6a7a,
+      /* Icicles */
+      24px 16px 0 2px #c8e8ff,
+      32px 16px 0 2px #c8e8ff,
+      44px 16px 0 2px #c8e8ff,
+      48px 16px 0 2px #c8e8ff,
+      /* Wall */
+      20px 16px 0 4px #7a8a9a,
+      24px 16px 0 4px #7a8a9a,
+      28px 16px 0 4px #8a9aaa,
+      32px 16px 0 4px #8a9aaa,
+      36px 16px 0 4px #7a8a9a,
+      40px 16px 0 4px #8a9aaa,
+      44px 16px 0 4px #7a8a9a,
+      48px 16px 0 4px #8a9aaa,
+      52px 16px 0 4px #7a8a9a,
+      20px 20px 0 4px #8a9aaa,
+      24px 20px 0 4px #7a8a9a,
+      28px 20px 0 4px #88e0ef, /* window cyan */
+      32px 20px 0 4px #88e0ef,
+      36px 20px 0 4px #8a9aaa,
+      40px 20px 0 4px #88e0ef, /* window cyan */
+      44px 20px 0 4px #88e0ef,
+      48px 20px 0 4px #7a8a9a,
+      52px 20px 0 4px #8a9aaa,
+      20px 24px 0 4px #7a8a9a,
+      24px 24px 0 4px #8a9aaa,
+      28px 24px 0 4px #7a8a9a,
+      32px 24px 0 4px #8a9aaa,
+      36px 24px 0 4px #7a8a9a,
+      40px 24px 0 4px #8a9aaa,
+      44px 24px 0 4px #7a8a9a,
+      48px 24px 0 4px #8a9aaa,
+      52px 24px 0 4px #7a8a9a,
+      20px 28px 0 4px #8a9aaa,
+      24px 28px 0 4px #7a8a9a,
+      28px 28px 0 4px #8a9aaa,
+      32px 28px 0 4px #7a8a9a,
+      36px 28px 0 4px #5a4a3a, /* door */
+      40px 28px 0 4px #7a8a9a,
+      44px 28px 0 4px #8a9aaa,
+      48px 28px 0 4px #7a8a9a,
+      52px 28px 0 4px #8a9aaa,
+      20px 32px 0 4px #7a8a9a,
+      24px 32px 0 4px #8a9aaa,
+      28px 32px 0 4px #7a8a9a,
+      32px 32px 0 4px #8a9aaa,
+      36px 32px 0 4px #5a4a3a, /* door */
+      40px 32px 0 4px #8a9aaa,
+      44px 32px 0 4px #7a8a9a,
+      48px 32px 0 4px #8a9aaa,
+      52px 32px 0 4px #7a8a9a;
+  }
+
+  /* Hotplate */
+  .building-hotplate {
+    width: 8px;
+    height: 8px;
+    position: relative;
+  }
+
+  .building-hotplate::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    image-rendering: pixelated;
+    box-shadow:
+      /* Chimney */
+      48px 0px 0 4px #6a4a2a,
+      48px 4px 0 4px #7a5a3a,
+      /* Awning - red/white stripes */
+      16px 8px 0 4px #cc3333,
+      20px 8px 0 4px #fff,
+      24px 8px 0 4px #cc3333,
+      28px 8px 0 4px #fff,
+      32px 8px 0 4px #cc3333,
+      36px 8px 0 4px #fff,
+      40px 8px 0 4px #cc3333,
+      44px 8px 0 4px #fff,
+      48px 8px 0 4px #cc3333,
+      52px 8px 0 4px #fff,
+      56px 8px 0 4px #cc3333,
+      /* Wall row 1 */
+      20px 12px 0 4px #8B6914,
+      24px 12px 0 4px #7a5a10,
+      28px 12px 0 4px #8B6914,
+      32px 12px 0 4px #7a5a10,
+      36px 12px 0 4px #8B6914,
+      40px 12px 0 4px #7a5a10,
+      44px 12px 0 4px #8B6914,
+      48px 12px 0 4px #7a5a10,
+      52px 12px 0 4px #8B6914,
+      /* Wall row 2 - windows */
+      20px 16px 0 4px #7a5a10,
+      24px 16px 0 4px #f0a830, /* amber window */
+      28px 16px 0 4px #f0a830,
+      32px 16px 0 4px #8B6914,
+      36px 16px 0 4px #7a5a10,
+      40px 16px 0 4px #f0a830, /* amber window */
+      44px 16px 0 4px #f0a830,
+      48px 16px 0 4px #7a5a10,
+      52px 16px 0 4px #8B6914,
+      /* Wall row 3 */
+      20px 20px 0 4px #8B6914,
+      24px 20px 0 4px #7a5a10,
+      28px 20px 0 4px #8B6914,
+      32px 20px 0 4px #7a5a10,
+      36px 20px 0 4px #8B6914,
+      40px 20px 0 4px #7a5a10,
+      44px 20px 0 4px #8B6914,
+      48px 20px 0 4px #7a5a10,
+      52px 20px 0 4px #8B6914,
+      /* Wall row 4 - door + OPEN sign */
+      20px 24px 0 4px #7a5a10,
+      24px 24px 0 4px #8B6914,
+      28px 24px 0 4px #7a5a10,
+      32px 24px 0 4px #8B6914,
+      36px 24px 0 4px #5a3a1a, /* door */
+      40px 24px 0 4px #5a3a1a,
+      44px 24px 0 4px #4CAF50, /* OPEN sign */
+      48px 24px 0 4px #7a5a10,
+      52px 24px 0 4px #8B6914,
+      /* Wall row 5 - door continues */
+      20px 28px 0 4px #8B6914,
+      24px 28px 0 4px #7a5a10,
+      28px 28px 0 4px #8B6914,
+      32px 28px 0 4px #7a5a10,
+      36px 28px 0 4px #5a3a1a, /* door */
+      40px 28px 0 4px #5a3a1a,
+      44px 28px 0 4px #8B6914,
+      48px 28px 0 4px #7a5a10,
+      52px 28px 0 4px #8B6914;
+  }
+
+  /* Rabbits & Hats Castle */
+  .building-rabbits {
+    width: 8px;
+    height: 8px;
+    position: relative;
+  }
+
+  .building-rabbits::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    image-rendering: pixelated;
+    box-shadow:
+      /* Left turret */
+      16px 0px 0 4px #7a4a9a,
+      16px 4px 0 4px #6a3a8a,
+      16px 8px 0 4px #7a4a9a,
+      /* Right turret */
+      56px 0px 0 4px #7a4a9a,
+      56px 4px 0 4px #6a3a8a,
+      56px 8px 0 4px #7a4a9a,
+      /* Top wall */
+      20px 4px 0 4px #6a3a8a,
+      24px 4px 0 4px #7a4a9a,
+      28px 4px 0 4px #6a3a8a,
+      32px 4px 0 4px #7a4a9a,
+      36px 4px 0 4px #6a3a8a,
+      40px 4px 0 4px #7a4a9a,
+      44px 4px 0 4px #6a3a8a,
+      48px 4px 0 4px #7a4a9a,
+      52px 4px 0 4px #6a3a8a,
+      /* Battlements */
+      20px 8px 0 4px #7a4a9a,
+      28px 8px 0 4px #7a4a9a,
+      36px 8px 0 4px #7a4a9a,
+      44px 8px 0 4px #7a4a9a,
+      52px 8px 0 4px #7a4a9a,
+      /* Wall */
+      20px 12px 0 4px #6a3a8a,
+      24px 12px 0 4px #7a4a9a,
+      28px 12px 0 4px #6a3a8a,
+      32px 12px 0 4px #7a4a9a,
+      36px 12px 0 4px #6a3a8a,
+      40px 12px 0 4px #7a4a9a,
+      44px 12px 0 4px #6a3a8a,
+      48px 12px 0 4px #7a4a9a,
+      52px 12px 0 4px #6a3a8a,
+      /* Windows row */
+      20px 16px 0 4px #7a4a9a,
+      24px 16px 0 4px #6a3a8a,
+      28px 16px 0 4px #9a6abf, /* arched window glow */
+      32px 16px 0 4px #6a3a8a,
+      36px 16px 0 4px #7a4a9a,
+      40px 16px 0 4px #6a3a8a,
+      44px 16px 0 4px #9a6abf, /* arched window glow */
+      48px 16px 0 4px #6a3a8a,
+      52px 16px 0 4px #7a4a9a,
+      /* Lower wall */
+      20px 20px 0 4px #6a3a8a,
+      24px 20px 0 4px #7a4a9a,
+      28px 20px 0 4px #6a3a8a,
+      32px 20px 0 4px #7a4a9a,
+      36px 20px 0 4px #6a3a8a,
+      40px 20px 0 4px #7a4a9a,
+      44px 20px 0 4px #6a3a8a,
+      48px 20px 0 4px #7a4a9a,
+      52px 20px 0 4px #6a3a8a,
+      /* Door + arch */
+      20px 24px 0 4px #7a4a9a,
+      24px 24px 0 4px #6a3a8a,
+      28px 24px 0 4px #7a4a9a,
+      32px 24px 0 4px #6a3a8a,
+      36px 24px 0 4px #4a2a5a, /* door */
+      40px 24px 0 4px #4a2a5a,
+      44px 24px 0 4px #6a3a8a,
+      48px 24px 0 4px #7a4a9a,
+      52px 24px 0 4px #6a3a8a,
+      /* Bottom + construction tape */
+      20px 28px 0 4px #6a3a8a,
+      24px 28px 0 4px #dda800,
+      28px 28px 0 4px #222,
+      32px 28px 0 4px #dda800,
+      36px 28px 0 4px #222,
+      40px 28px 0 4px #dda800,
+      44px 28px 0 4px #222,
+      48px 28px 0 4px #dda800,
+      52px 28px 0 4px #6a3a8a;
+  }
+
+  /* --- SPRITES --- */
+
+  /* Snowflake sprite */
+  .sprite-snowflake::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    image-rendering: pixelated;
+    box-shadow:
+      12px 0px 0 4px #88e0ef,
+      28px 0px 0 4px #88e0ef,
+      8px 4px 0 4px #a0ecff,
+      12px 4px 0 4px #88e0ef,
+      16px 4px 0 4px #a0ecff,
+      20px 4px 0 4px #c8f4ff,
+      24px 4px 0 4px #a0ecff,
+      28px 4px 0 4px #88e0ef,
+      32px 4px 0 4px #a0ecff,
+      12px 8px 0 4px #a0ecff,
+      16px 8px 0 4px #c8f4ff,
+      20px 8px 0 4px #88e0ef,
+      24px 8px 0 4px #c8f4ff,
+      28px 8px 0 4px #a0ecff,
+      0px 12px 0 4px #88e0ef,
+      4px 12px 0 4px #a0ecff,
+      8px 12px 0 4px #c8f4ff,
+      12px 12px 0 4px #88e0ef,
+      16px 12px 0 4px #a0ecff,
+      20px 12px 0 4px #ddf8ff,
+      24px 12px 0 4px #a0ecff,
+      28px 12px 0 4px #88e0ef,
+      32px 12px 0 4px #c8f4ff,
+      36px 12px 0 4px #a0ecff,
+      40px 12px 0 4px #88e0ef,
+      12px 16px 0 4px #a0ecff,
+      16px 16px 0 4px #c8f4ff,
+      20px 16px 0 4px #88e0ef,
+      24px 16px 0 4px #c8f4ff,
+      28px 16px 0 4px #a0ecff,
+      8px 20px 0 4px #a0ecff,
+      12px 20px 0 4px #88e0ef,
+      16px 20px 0 4px #a0ecff,
+      20px 20px 0 4px #c8f4ff,
+      24px 20px 0 4px #a0ecff,
+      28px 20px 0 4px #88e0ef,
+      32px 20px 0 4px #a0ecff,
+      12px 24px 0 4px #88e0ef,
+      28px 24px 0 4px #88e0ef;
+  }
+
+  /* Frying pan sprite */
+  .sprite-pan::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    image-rendering: pixelated;
+    box-shadow:
+      /* Flame */
+      20px 0px 0 4px #ff6600,
+      24px 0px 0 4px #ffaa00,
+      16px 4px 0 4px #ff4400,
+      20px 4px 0 4px #ffcc00,
+      24px 4px 0 4px #ffee00,
+      28px 4px 0 4px #ff6600,
+      20px 8px 0 4px #ff6600,
+      24px 8px 0 4px #ff8800,
+      /* Pan body */
+      12px 12px 0 4px #666,
+      16px 12px 0 4px #555,
+      20px 12px 0 4px #555,
+      24px 12px 0 4px #555,
+      28px 12px 0 4px #555,
+      32px 12px 0 4px #666,
+      8px 16px 0 4px #666,
+      12px 16px 0 4px #555,
+      16px 16px 0 4px #444,
+      20px 16px 0 4px #444,
+      24px 16px 0 4px #444,
+      28px 16px 0 4px #444,
+      32px 16px 0 4px #555,
+      36px 16px 0 4px #666,
+      8px 20px 0 4px #666,
+      12px 20px 0 4px #555,
+      16px 20px 0 4px #444,
+      20px 20px 0 4px #444,
+      24px 20px 0 4px #444,
+      28px 20px 0 4px #444,
+      32px 20px 0 4px #555,
+      36px 20px 0 4px #666,
+      12px 24px 0 4px #666,
+      16px 24px 0 4px #555,
+      20px 24px 0 4px #555,
+      24px 24px 0 4px #555,
+      28px 24px 0 4px #555,
+      32px 24px 0 4px #666,
+      /* Handle */
+      36px 20px 0 4px #8B6914,
+      40px 20px 0 4px #8B6914,
+      44px 20px 0 4px #8B6914,
+      48px 20px 0 4px #7a5a10;
+  }
+
+  /* Rabbit in hat sprite */
+  .sprite-rabbit::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    image-rendering: pixelated;
+    box-shadow:
+      /* Ears */
+      12px 0px 0 4px #e8dae8,
+      24px 0px 0 4px #e8dae8,
+      12px 4px 0 4px #e0cce0,
+      24px 4px 0 4px #e0cce0,
+      /* Head */
+      12px 8px 0 4px #f0e4f0,
+      16px 8px 0 4px #f0e4f0,
+      20px 8px 0 4px #f0e4f0,
+      24px 8px 0 4px #f0e4f0,
+      12px 12px 0 4px #f0e4f0,
+      16px 12px 0 4px #222, /* eye */
+      20px 12px 0 4px #f8c8d8, /* nose */
+      24px 12px 0 4px #222, /* eye */
+      16px 16px 0 4px #f0e4f0,
+      20px 16px 0 4px #f0e4f0,
+      /* Hat brim */
+      4px 20px 0 4px #6a3a8a,
+      8px 20px 0 4px #7a4a9a,
+      12px 20px 0 4px #7a4a9a,
+      16px 20px 0 4px #7a4a9a,
+      20px 20px 0 4px #7a4a9a,
+      24px 20px 0 4px #7a4a9a,
+      28px 20px 0 4px #7a4a9a,
+      32px 20px 0 4px #6a3a8a,
+      /* Hat body */
+      8px 24px 0 4px #6a3a8a,
+      12px 24px 0 4px #7a4a9a,
+      16px 24px 0 4px #6a3a8a,
+      20px 24px 0 4px #7a4a9a,
+      24px 24px 0 4px #6a3a8a,
+      28px 24px 0 4px #7a4a9a,
+      8px 28px 0 4px #7a4a9a,
+      12px 28px 0 4px #6a3a8a,
+      16px 28px 0 4px #7a4a9a,
+      20px 28px 0 4px #6a3a8a,
+      24px 28px 0 4px #7a4a9a,
+      28px 28px 0 4px #6a3a8a;
+  }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 700px) {
+    .header h1 { font-size: 1.4rem; letter-spacing: 2px; }
+    .buildings-row { gap: 16px; }
+    .building-chambre::after,
+    .building-hotplate::after,
+    .building-rabbits::after {
+      transform: scale(0.7);
+      transform-origin: bottom center;
+    }
+    .info-row {
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .info-card {
+      max-width: 340px;
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="sky" id="sky">
+    <!-- Moon -->
+    <div class="moon"></div>
+    <div class="moon-glow"></div>
+
+    <!-- Clouds -->
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>FLY AGILE GAMES</h1>
+      <p>Des jeux collaboratifs pour vos equipes</p>
+    </div>
+  </div>
+
+  <!-- Ground area with buildings -->
+  <div class="ground-area">
+    <div class="grass">
+      <div class="grass-top"></div>
+      <div class="buildings-row" style="margin-top: -140px; position: relative; z-index: 6;">
+
+        <!-- La Chambre Froide -->
+        <a href="https://chambre-froide.fly-agile.com" class="building-wrapper" style="text-decoration:none;color:inherit;">
+          <div class="building building-chambre" style="width:76px;height:40px;">
+            <div class="door-glow" style="bottom:4px;left:34px;width:16px;height:16px;background:radial-gradient(circle,rgba(136,224,239,0.5),transparent);"></div>
+          </div>
+        </a>
+
+        <!-- Hotplate -->
+        <a href="https://hotplate.fly-agile.com" class="building-wrapper" style="text-decoration:none;color:inherit;">
+          <div class="building building-hotplate" style="width:76px;height:40px;position:relative;">
+            <!-- Smoke particles -->
+            <div class="smoke-particle" style="left:52px;top:-8px;--dur:7s;--delay:0s;"></div>
+            <div class="smoke-particle" style="left:48px;top:-6px;--dur:6s;--delay:2s;"></div>
+            <div class="smoke-particle" style="left:54px;top:-10px;--dur:8s;--delay:4s;"></div>
+            <div class="door-glow" style="bottom:0px;left:36px;width:16px;height:16px;background:radial-gradient(circle,rgba(240,168,48,0.5),transparent);"></div>
+          </div>
+        </a>
+
+        <!-- Rabbits & Hats -->
+        <div class="building-wrapper locked">
+          <div class="building building-rabbits" style="width:76px;height:40px;position:relative;">
+            <!-- Sparkles -->
+            <div class="sparkle" style="top:-10px;left:10px;animation-delay:0s;"></div>
+            <div class="sparkle" style="top:5px;right:2px;animation-delay:1.5s;"></div>
+            <div class="sparkle" style="top:-5px;left:40px;animation-delay:3s;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Path -->
+      <div class="path" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- Game info section -->
+  <div class="info-section">
+    <div class="info-row">
+
+      <!-- Chambre Froide info -->
+      <div class="info-card">
+        <div class="sprite-icon sprite-snowflake"></div>
+        <div class="info-text">
+          <h3 class="cyan">LA CHAMBRE FROIDE</h3>
+          <p>Estimez en equipe avec le Planning Poker dans une ambiance givree.</p>
+          <span class="status live"><span class="status-dot live"></span> LIVE</span>
+        </div>
+      </div>
+
+      <!-- Hotplate info -->
+      <div class="info-card">
+        <div class="sprite-icon sprite-pan"></div>
+        <div class="info-text">
+          <h3 class="amber">HOTPLATE</h3>
+          <p>Cuisinez vos retrospectives et servez des plans d'action bien chauds.</p>
+          <span class="status live"><span class="status-dot live"></span> LIVE</span>
+        </div>
+      </div>
+
+      <!-- Rabbits info -->
+      <div class="info-card locked">
+        <div class="sprite-icon sprite-rabbit"></div>
+        <div class="info-text">
+          <h3 class="purple">RABBITS & HATS</h3>
+          <p>Decouvrez les talents caches de votre equipe avec un tour de magie.</p>
+          <span class="status soon"><span class="status-dot soon"></span> COMING SOON</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Fly Agile
+  </footer>
+</div>
+
+<script>
+  // Generate twinkling stars
+  (function() {
+    const sky = document.getElementById('sky');
+    const starCount = 60;
+
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 80 + '%';
+      star.style.setProperty('--dur', (4 + Math.random() * 3) + 's');
+      star.style.setProperty('--delay', (Math.random() * 5) + 's');
+
+      // Some stars slightly bigger
+      if (Math.random() > 0.85) {
+        star.style.width = '3px';
+        star.style.height = '3px';
+      }
+
+      sky.appendChild(star);
+    }
+  })();
+</script>
+
+</body>
+</html>
