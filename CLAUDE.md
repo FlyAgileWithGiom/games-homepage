@@ -75,20 +75,24 @@ Each game keeps its own identity and can evolve independently. The homepage has 
 - Adventure map top-down (zones too abstract, Prototype E3)
 
 ## Games & URL Routing
-Games are served under the homepage domain with path-based routing:
+Two domains:
+- **games.fly-agile.com** = homepage (this project)
+- **play.fly-agile.com** = direct game access
 
-| Game | Status | Path | Homepage Color |
-|------|--------|------|---------------|
-| La Chambre Froide | LIVE (needs redeployment) | /frozen-chamber | Cyan/blue |
-| Hotplate | LIVE | /hotplate | Amber/orange |
+| Game | Status | URL | Homepage Color |
+|------|--------|-----|---------------|
+| La Chambre Froide | Needs redeployment | play.fly-agile.com/frozen-chamber | Cyan/blue |
+| Hotplate | LIVE on K3s | play.fly-agile.com | Amber/orange |
 | Rabbits & Hats | COMING SOON | TBD | Purple/pink |
 
 ## Infrastructure
-- **Hosting**: Scaleway Serverless Containers
-- **Existing games**: Also on Scaleway Serverless Containers (separate containers)
-- **K3s cluster**: Exists for MCP services (mcp.fly-agile.com), NOT for games currently
-- **Future**: Path-based routing may require ingress consolidation if games move to K3s
-- **Domain**: TBD (see GitLab issue #12)
+- **Hosting**: K3s cluster on Scaleway Kapsule (ArgoCD GitOps)
+- **Infra repo**: github.com/FlyAgileWithGiom/mcp-infra-platform
+- **K8s manifests**: `apps/games-homepage/` (base + overlays/prod)
+- **ArgoCD app**: `argocd/games-homepage-prod.yaml`
+- **Ingress**: nginx-ingress + cert-manager (letsencrypt-prod)
+- **Registry**: rg.fr-par.scw.cloud/fly-agile-prod/games-homepage
+- **DNS**: PlanetHoster (games.fly-agile.com → 51.159.25.216)
 - **Target**: sub-2s load on 4G
 
 ## Access Model
