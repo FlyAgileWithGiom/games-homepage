@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fly Agile Games - Pixel Art Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sky-top: #1a1a3e;
+            --sky-bottom: #2d1b69;
+            --ground: #2d5a27;
+            --ground-dark: #1e3d1a;
+            --path: #8b7355;
+            --path-light: #a89070;
+            --building-stone: #6b6b8d;
+            --building-dark: #4a4a6a;
+            --wood: #8b5e3c;
+            --wood-dark: #6b4226;
+            --snow: #e8f0ff;
+            --fire: #ff6b35;
+            --fire-light: #ffaa00;
+            --purple-magic: #a855f7;
+            --star: #fffde7;
+        }
+
+        body {
+            font-family: 'Silkscreen', monospace;
+            background: var(--sky-top);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: clamp(1.2rem, 4vw, 2.2rem);
+            color: var(--star);
+            text-shadow: 3px 3px 0 #1a1a3e, 0 0 20px rgba(255, 253, 231, 0.3);
+            letter-spacing: 4px;
+        }
+
+        .subtitle {
+            font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+            color: #a8a0d0;
+            margin-top: 0.5rem;
+            letter-spacing: 3px;
+        }
+
+        /* Pixel Scene Container */
+        .scene {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 500px;
+            background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 40%, var(--ground) 65%, var(--ground-dark) 100%);
+            overflow: hidden;
+        }
+
+        /* Stars */
+        .star {
+            position: absolute;
+            background: var(--star);
+            animation: starTwinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0;
+            animation: cloudDrift 30s linear infinite;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .cloud-1 { top: 8%; width: 80px; height: 16px; animation-duration: 35s; }
+        .cloud-1::before { width: 32px; height: 16px; top: -16px; left: 16px; }
+        .cloud-1::after { width: 24px; height: 16px; top: -16px; left: 40px; }
+
+        .cloud-2 { top: 15%; width: 64px; height: 12px; animation-duration: 45s; animation-delay: -15s; }
+        .cloud-2::before { width: 24px; height: 12px; top: -12px; left: 12px; }
+
+        @keyframes cloudDrift {
+            from { transform: translateX(-150px); }
+            to { transform: translateX(calc(100vw + 150px)); }
+        }
+
+        /* Ground path */
+        .ground-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+        }
+
+        .path {
+            position: absolute;
+            bottom: 60px;
+            left: 5%;
+            right: 5%;
+            height: 24px;
+            background: var(--path);
+            border-top: 4px solid var(--path-light);
+            border-bottom: 4px solid #6b5540;
+        }
+
+        /* Buildings Container */
+        .buildings {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding: 0 5%;
+        }
+
+        /* Building base styles */
+        .building {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .building:hover {
+            transform: translateY(-4px);
+        }
+
+        .building-label {
+            font-size: clamp(0.4rem, 1.2vw, 0.6rem);
+            text-align: center;
+            margin-top: 8px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+            letter-spacing: 1px;
+        }
+
+        .building-status {
+            font-size: 0.35rem;
+            margin-top: 4px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+        }
+
+        .building-status--live {
+            background: #059669;
+            color: white;
+        }
+
+        .building-status--soon {
+            background: #6b7280;
+            color: #d1d5db;
+        }
+
+        /* Building 1: Cold Chamber - Ice/Stone tower */
+        .building-cold {
+            width: 120px;
+        }
+
+        .cold-structure {
+            position: relative;
+            width: 80px;
+            height: 120px;
+            background: var(--building-stone);
+            border: 4px solid var(--building-dark);
+        }
+
+        /* Roof */
+        .cold-structure::before {
+            content: '';
+            position: absolute;
+            top: -32px;
+            left: -8px;
+            width: 0;
+            height: 0;
+            border-left: 48px solid transparent;
+            border-right: 48px solid transparent;
+            border-bottom: 32px solid var(--building-dark);
+        }
+
+        /* Snow on roof */
+        .cold-snow {
+            position: absolute;
+            top: -36px;
+            left: -4px;
+            width: 88px;
+            height: 8px;
+            background: var(--snow);
+            z-index: 2;
+        }
+
+        /* Door */
+        .cold-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 36px;
+            background: #3b3b5c;
+            border: 2px solid #2a2a4a;
+            transition: background 0.2s;
+        }
+
+        .building-cold:hover .cold-door {
+            background: #4fc3f7;
+            box-shadow: 0 0 12px rgba(79, 195, 247, 0.6);
+        }
+
+        /* Window */
+        .cold-window {
+            position: absolute;
+            top: 20px;
+            width: 16px;
+            height: 16px;
+            background: #4fc3f7;
+            border: 2px solid var(--building-dark);
+            box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
+        }
+
+        .cold-window-l { left: 10px; }
+        .cold-window-r { right: 10px; }
+
+        /* Icicles */
+        .icicle {
+            position: absolute;
+            top: -4px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--snow), rgba(200, 230, 255, 0.5));
+        }
+
+        .icicle-1 { left: 15px; height: 16px; }
+        .icicle-2 { left: 35px; height: 12px; }
+        .icicle-3 { right: 15px; height: 20px; }
+
+        /* Building 2: Hotplate - Restaurant/Kitchen */
+        .building-hot {
+            width: 140px;
+        }
+
+        .hot-structure {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: var(--wood);
+            border: 4px solid var(--wood-dark);
+        }
+
+        .hot-structure::before {
+            content: '';
+            position: absolute;
+            top: -24px;
+            left: -12px;
+            width: 124px;
+            height: 24px;
+            background: #c0392b;
+            border: 4px solid #962d22;
+        }
+
+        /* Chimney */
+        .chimney {
+            position: absolute;
+            top: -48px;
+            right: 16px;
+            width: 16px;
+            height: 28px;
+            background: #962d22;
+            border: 2px solid #7a2419;
+        }
+
+        /* Smoke animation */
+        .smoke {
+            position: absolute;
+            top: -60px;
+            right: 18px;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0;
+            animation: smokeRise 2s ease-out infinite;
+        }
+
+        .smoke:nth-child(2) { animation-delay: 0.7s; right: 22px; }
+        .smoke:nth-child(3) { animation-delay: 1.4s; right: 16px; }
+
+        @keyframes smokeRise {
+            0% { transform: translateY(0) scale(1); opacity: 0.4; }
+            100% { transform: translateY(-40px) scale(2); opacity: 0; }
+        }
+
+        /* Hot windows */
+        .hot-window {
+            position: absolute;
+            width: 20px;
+            height: 16px;
+            background: var(--fire-light);
+            border: 2px solid var(--wood-dark);
+            box-shadow: 0 0 8px rgba(255, 170, 0, 0.4);
+        }
+
+        .hot-window-l { top: 16px; left: 12px; }
+        .hot-window-r { top: 16px; right: 12px; }
+
+        .hot-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 40px;
+            background: var(--wood-dark);
+            border: 2px solid #4a2e1a;
+            transition: background 0.2s;
+        }
+
+        .building-hot:hover .hot-door {
+            background: var(--fire-light);
+            box-shadow: 0 0 12px rgba(255, 170, 0, 0.6);
+        }
+
+        /* Sign */
+        .hot-sign {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--fire);
+            color: white;
+            font-size: 0.35rem;
+            padding: 2px 6px;
+            white-space: nowrap;
+            z-index: 5;
+            border: 2px solid #cc5a2d;
+        }
+
+        /* Building 3: Rabbits & Hats - Magic castle (under construction) */
+        .building-rabbit {
+            width: 120px;
+        }
+
+        .rabbit-structure {
+            position: relative;
+            width: 80px;
+            height: 110px;
+            background: #5b4a8a;
+            border: 4px solid #463872;
+            opacity: 0.7;
+        }
+
+        .rabbit-structure::before {
+            content: '';
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 28px solid #463872;
+        }
+
+        /* Tower tops */
+        .tower {
+            position: absolute;
+            bottom: 0;
+            width: 24px;
+            background: #5b4a8a;
+            border: 3px solid #463872;
+        }
+
+        .tower-l { left: -16px; height: 80px; }
+        .tower-r { right: -16px; height: 80px; }
+
+        .tower::before {
+            content: '';
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-bottom: 16px solid #463872;
+        }
+
+        /* Magic sparkles */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--purple-magic);
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        .sparkle-1 { top: -40px; left: 20px; animation-delay: 0s; }
+        .sparkle-2 { top: -20px; right: 0; animation-delay: 0.5s; }
+        .sparkle-3 { top: 10px; left: -10px; animation-delay: 1s; }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* Construction barrier */
+        .construction {
+            position: absolute;
+            bottom: -8px;
+            left: -20px;
+            right: -20px;
+            height: 12px;
+            background: repeating-linear-gradient(
+                -45deg,
+                #f59e0b,
+                #f59e0b 8px,
+                #1a1a2e 8px,
+                #1a1a2e 16px
+            );
+        }
+
+        .rabbit-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 36px;
+            background: #463872;
+            border: 2px solid #352a5c;
+        }
+
+        /* Lock icon */
+        .lock {
+            position: absolute;
+            bottom: 44px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            filter: grayscale(50%);
+        }
+
+        /* Grass tufts */
+        .grass {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 16px;
+        }
+
+        .grass-tuft {
+            position: absolute;
+            bottom: 0;
+            width: 8px;
+            height: 12px;
+            background: #3a7d32;
+        }
+
+        /* Pixel border */
+        .pixel-border {
+            height: 8px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--ground) 0px,
+                var(--ground) 8px,
+                var(--ground-dark) 8px,
+                var(--ground-dark) 16px
+            );
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--ground-dark);
+            font-size: 0.45rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+        }
+
+        /* Click hint */
+        .hint {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.5rem;
+            color: #a8a0d0;
+            letter-spacing: 2px;
+            animation: hintBlink 2s ease-in-out infinite;
+        }
+
+        @keyframes hintBlink {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .buildings {
+                flex-direction: column;
+                align-items: center;
+                gap: 2rem;
+                position: relative;
+                bottom: auto;
+                padding: 2rem 1rem;
+            }
+            .scene {
+                min-height: auto;
+                padding-bottom: 2rem;
+            }
+            .path { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="title">FLY AGILE GAMES</h1>
+        <p class="subtitle">ENTER A WORLD OF PLAY</p>
+    </header>
+
+    <div class="scene" id="scene">
+        <!-- Clouds -->
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+
+        <!-- Buildings -->
+        <div class="buildings">
+            <!-- La Chambre Froide -->
+            <a href="https://chambre-froide.flyagile.com" class="building building-cold">
+                <div class="cold-structure">
+                    <div class="cold-snow"></div>
+                    <div class="icicle icicle-1"></div>
+                    <div class="icicle icicle-2"></div>
+                    <div class="icicle icicle-3"></div>
+                    <div class="cold-window cold-window-l"></div>
+                    <div class="cold-window cold-window-r"></div>
+                    <div class="cold-door"></div>
+                </div>
+                <span class="building-label">LA CHAMBRE<br>FROIDE</span>
+                <span class="building-status building-status--live">LIVE</span>
+            </a>
+
+            <!-- Hotplate -->
+            <a href="https://hotplate.flyagile.com" class="building building-hot">
+                <div class="hot-structure">
+                    <div class="chimney"></div>
+                    <div class="smoke"></div>
+                    <div class="smoke"></div>
+                    <div class="smoke"></div>
+                    <div class="hot-sign">HOTPLATE</div>
+                    <div class="hot-window hot-window-l"></div>
+                    <div class="hot-window hot-window-r"></div>
+                    <div class="hot-door"></div>
+                </div>
+                <span class="building-label">HOTPLATE</span>
+                <span class="building-status building-status--live">LIVE</span>
+            </a>
+
+            <!-- Rabbits & Hats -->
+            <div class="building building-rabbit">
+                <div class="rabbit-structure">
+                    <div class="tower tower-l"></div>
+                    <div class="tower tower-r"></div>
+                    <div class="sparkle sparkle-1"></div>
+                    <div class="sparkle sparkle-2"></div>
+                    <div class="sparkle sparkle-3"></div>
+                    <div class="lock">&#128274;</div>
+                    <div class="rabbit-door"></div>
+                    <div class="construction"></div>
+                </div>
+                <span class="building-label">RABBITS<br>&amp; HATS</span>
+                <span class="building-status building-status--soon">COMING SOON</span>
+            </div>
+        </div>
+
+        <!-- Path -->
+        <div class="path"></div>
+    </div>
+
+    <div class="hint">CLICK A BUILDING TO ENTER</div>
+
+    <div class="pixel-border"></div>
+
+    <footer>
+        &copy; 2026 FLY AGILE GAMES
+    </footer>
+
+    <script>
+        // Generate stars
+        const scene = document.getElementById('scene');
+        for (let i = 0; i < 40; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 35 + '%';
+            star.style.width = star.style.height = (2 + Math.random() * 2) + 'px';
+            star.style.animationDelay = Math.random() * 2 + 's';
+            star.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+            scene.appendChild(star);
+        }
+    </script>
+</body>
+</html>

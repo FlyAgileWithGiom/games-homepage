@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fly Agile Games - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #f8f7f4;
+            --text: #1a1a2e;
+            --text-muted: #6b7280;
+            --card-bg: #ffffff;
+            --teal: #0d9488;
+            --teal-light: #ccfbf1;
+            --orange: #ea580c;
+            --orange-light: #fff7ed;
+            --purple: #7c3aed;
+            --purple-light: #f3e8ff;
+            --green-badge: #059669;
+            --gray-badge: #9ca3af;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header */
+        header {
+            padding: 3rem 0 1rem;
+            text-align: center;
+        }
+
+        .logo-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--teal), var(--purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-top: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Divider */
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--teal), var(--orange), var(--purple));
+            margin: 2rem auto;
+            border-radius: 2px;
+        }
+
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 1rem 0 4rem;
+        }
+
+        /* Game Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card--disabled {
+            cursor: default;
+        }
+        .card--disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Card banner */
+        .card-banner {
+            height: 160px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .card--teal .card-banner {
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 50%, #5eead4 100%);
+        }
+        .card--orange .card-banner {
+            background: linear-gradient(135deg, #c2410c 0%, #f97316 50%, #fdba74 100%);
+        }
+        .card--purple .card-banner {
+            background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 50%, #c4b5fd 100%);
+        }
+
+        .card-banner-icon {
+            font-size: 4rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-banner-icon {
+            transform: scale(1.1) rotate(-3deg);
+        }
+
+        /* Abstract shapes in banner */
+        .card-banner::before,
+        .card-banner::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+        }
+        .card-banner::before {
+            width: 200px;
+            height: 200px;
+            background: white;
+            top: -60px;
+            right: -40px;
+        }
+        .card-banner::after {
+            width: 120px;
+            height: 120px;
+            background: white;
+            bottom: -30px;
+            left: -20px;
+        }
+
+        /* Card body */
+        .card-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.35rem 0.75rem;
+            border-radius: 100px;
+            margin: 1rem 0;
+            width: fit-content;
+        }
+
+        .badge--live {
+            background: #ecfdf5;
+            color: var(--green-badge);
+        }
+
+        .badge--live::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green-badge);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .badge--soon {
+            background: #f3f4f6;
+            color: var(--gray-badge);
+        }
+
+        /* CTA Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            letter-spacing: 0.3px;
+        }
+
+        .card--teal .btn--primary {
+            background: var(--teal);
+            color: white;
+        }
+        .card--teal .btn--primary:hover {
+            background: #0f766e;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+        }
+
+        .card--orange .btn--primary {
+            background: var(--orange);
+            color: white;
+        }
+        .card--orange .btn--primary:hover {
+            background: #c2410c;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+        }
+
+        .btn--disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .btn--disabled:hover {
+            background: #e5e7eb;
+            box-shadow: none;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem 0 3rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 0.75rem;
+        }
+
+        .footer-links a {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                max-width: 420px;
+                margin: 0 auto;
+            }
+            header { padding: 2rem 0 0.5rem; }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-row">
+                <div class="logo-icon">&#127918;</div>
+                <h1 class="title">Fly Agile Games</h1>
+            </div>
+            <p class="subtitle">Discover our collection of collaborative games</p>
+            <div class="divider"></div>
+        </header>
+
+        <div class="games-grid">
+            <!-- La Chambre Froide -->
+            <a href="https://chambre-froide.flyagile.com" class="card card--teal">
+                <div class="card-banner">
+                    <span class="card-banner-icon">&#10052;</span>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">La Chambre Froide</h2>
+                    <p class="card-desc">Puzzle math&eacute;matique r&eacute;tro-terminal. Plongez dans un univers glacial o&ugrave; chaque calcul compte.</p>
+                    <span class="badge badge--live">Live</span>
+                    <button class="btn btn--primary">Play Now &rarr;</button>
+                </div>
+            </a>
+
+            <!-- Hotplate -->
+            <a href="https://hotplate.flyagile.com" class="card card--orange">
+                <div class="card-banner">
+                    <span class="card-banner-icon">&#127860;</span>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">Hotplate</h2>
+                    <p class="card-desc">Jeu de cuisine collaboratif pixel art. Coordonnez-vous pour servir les clients &agrave; temps.</p>
+                    <span class="badge badge--live">Live</span>
+                    <button class="btn btn--primary">Play Now &rarr;</button>
+                </div>
+            </a>
+
+            <!-- Rabbits & Hats -->
+            <div class="card card--purple card--disabled">
+                <div class="card-banner">
+                    <span class="card-banner-icon">&#128007;</span>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">Rabbits &amp; Hats</h2>
+                    <p class="card-desc">Puzzle multijoueur strat&eacute;gie. R&eacute;solvez des &eacute;nigmes en &eacute;quipe avec lapins et chapeaux.</p>
+                    <span class="badge badge--soon">Coming Soon</span>
+                    <button class="btn btn--disabled" disabled>Coming Soon</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p class="footer-text">&copy; 2026 Fly Agile. Tous droits r&eacute;serv&eacute;s.</p>
+            <div class="footer-links">
+                <a href="#">Twitter</a>
+                <a href="#">LinkedIn</a>
+                <a href="#">Contact</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

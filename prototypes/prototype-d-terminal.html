@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLY AGILE GAMES - Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --green: #33ff33;
+    --green-dim: #1a9e1a;
+    --green-dark: #0a3a0a;
+    --amber: #ffaa00;
+    --red: #ff3333;
+    --bg: #0a0a0a;
+    --glow: 0 0 8px rgba(51, 255, 51, 0.6);
+    --glow-strong: 0 0 15px rgba(51, 255, 51, 0.8), 0 0 30px rgba(51, 255, 51, 0.3);
+  }
+
+  body {
+    background: #000;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+  }
+
+  #crt {
+    position: relative;
+    width: 96vw;
+    height: 94vh;
+    max-width: 1000px;
+    background: var(--bg);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(51, 255, 51, 0.15), inset 0 0 80px rgba(0,0,0,0.6);
+    border: 2px solid #1a1a1a;
+  }
+
+  /* Scanlines overlay */
+  #crt::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 2px,
+      rgba(0, 0, 0, 0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Vignette overlay */
+  #crt::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 50%,
+      rgba(0, 0, 0, 0.5) 80%,
+      rgba(0, 0, 0, 0.85) 100%
+    );
+    pointer-events: none;
+    z-index: 11;
+  }
+
+  #screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 30px 35px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 5;
+    scrollbar-width: none;
+  }
+  #screen::-webkit-scrollbar { display: none; }
+
+  #terminal-output {
+    color: var(--green);
+    font-size: 18px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-shadow: var(--glow);
+  }
+
+  .line { display: block; min-height: 1.4em; }
+  .line-dim { opacity: 0.5; }
+  .line-bright { text-shadow: var(--glow-strong); }
+  .status-online { color: var(--green); }
+  .status-offline { color: var(--amber); }
+
+  .game-entry {
+    display: block;
+    margin: 4px 0;
+  }
+
+  .launch-btn {
+    color: var(--green);
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    text-shadow: var(--glow);
+    padding: 0;
+    transition: text-shadow 0.1s;
+  }
+  .launch-btn:hover {
+    text-shadow: var(--glow-strong);
+    color: #88ff88;
+  }
+
+  .locked-label {
+    color: var(--amber);
+    opacity: 0.6;
+    text-shadow: 0 0 8px rgba(255, 170, 0, 0.4);
+  }
+
+  /* Blinking cursor */
+  #cursor {
+    display: inline;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Screen flicker */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.85; }
+    94% { opacity: 1; }
+    97% { opacity: 0.9; }
+    98% { opacity: 1; }
+  }
+  #crt { animation: flicker 4s infinite; }
+
+  /* Power on flash */
+  @keyframes poweron {
+    0% { filter: brightness(0); }
+    5% { filter: brightness(2); }
+    10% { filter: brightness(0.8); }
+    15% { filter: brightness(1.2); }
+    30% { filter: brightness(1); }
+  }
+  #crt.boot { animation: poweron 1.5s ease-out, flicker 4s infinite 1.5s; }
+
+  /* Hidden command input */
+  #cmd-input {
+    position: fixed;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Prompt section */
+  #prompt-section {
+    display: none;
+    margin-top: 8px;
+  }
+  #prompt-text {
+    color: var(--green);
+    font-size: 18px;
+    text-shadow: var(--glow);
+  }
+  #typed-cmd {
+    color: var(--green);
+    font-size: 18px;
+    text-shadow: var(--glow-strong);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    #crt { width: 100vw; height: 100vh; border-radius: 0; border: none; }
+    #screen { padding: 16px 12px; }
+    #terminal-output, .launch-btn, #prompt-text, #typed-cmd { font-size: 14px; }
+    .ascii-art { font-size: 10px !important; }
+  }
+  @media (min-width: 601px) and (max-width: 900px) {
+    #terminal-output, .launch-btn, #prompt-text, #typed-cmd { font-size: 16px; }
+    .ascii-art { font-size: 13px !important; }
+  }
+</style>
+</head>
+<body>
+<div id="crt" class="boot">
+  <div id="screen">
+    <div id="terminal-output"></div>
+    <div id="prompt-section">
+      <span id="prompt-text">&gt; ENTER GAME ID: </span><span id="typed-cmd"></span><span id="cursor">_</span>
+    </div>
+  </div>
+</div>
+<input id="cmd-input" type="text" autocomplete="off" autofocus>
+
+<script>
+(function() {
+  const output = document.getElementById('terminal-output');
+  const promptSection = document.getElementById('prompt-section');
+  const typedCmd = document.getElementById('typed-cmd');
+  const cmdInput = document.getElementById('cmd-input');
+  const screen = document.getElementById('screen');
+
+  const GAMES = {
+    '1': 'https://chambre-froide.flyagile.com',
+    '2': 'https://hotplate.flyagile.com',
+    '3': null
+  };
+
+  const TYPE_SPEED = 18;
+  const LINE_DELAY = 60;
+
+  function scrollToBottom() {
+    screen.scrollTop = screen.scrollHeight;
+  }
+
+  function addLine(text, cssClass, instant) {
+    return new Promise(resolve => {
+      const span = document.createElement('span');
+      span.className = 'line' + (cssClass ? ' ' + cssClass : '');
+
+      if (instant) {
+        span.innerHTML = text;
+        output.appendChild(span);
+        scrollToBottom();
+        resolve();
+        return;
+      }
+
+      output.appendChild(span);
+      let i = 0;
+      const plain = text.replace(/<[^>]*>/g, '');
+
+      function typeChar() {
+        if (i <= plain.length) {
+          // Rebuild with tags at the right position
+          span.innerHTML = reconstructWithTags(text, i);
+          i++;
+          scrollToBottom();
+          setTimeout(typeChar, TYPE_SPEED);
+        } else {
+          span.innerHTML = text;
+          scrollToBottom();
+          resolve();
+        }
+      }
+      typeChar();
+    });
+  }
+
+  // Reconstruct HTML string showing only first N visible characters
+  function reconstructWithTags(html, visibleCount) {
+    let result = '';
+    let visible = 0;
+    let inTag = false;
+
+    for (let i = 0; i < html.length; i++) {
+      const ch = html[i];
+      if (ch === '<') {
+        inTag = true;
+        result += ch;
+      } else if (ch === '>') {
+        inTag = false;
+        result += ch;
+      } else if (inTag) {
+        result += ch;
+      } else {
+        if (visible < visibleCount) {
+          result += ch;
+          visible++;
+        }
+      }
+    }
+    return result;
+  }
+
+  function addLineInstant(text, cssClass) {
+    return addLine(text, cssClass, true);
+  }
+
+  function pause(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  const ASCII_BANNER = `
+ _____ _  __   __    _    ____ ___ _     _____
+|  ___| | \\ \\ / /   / \\  / ___|_ _| |   | ____|
+| |_  | |  \\ V /   / _ \\| |  _ | || |   |  _|
+|  _| | |___| |   / ___ \\ |_| || || |___| |___
+|_|   |_____|_|  /_/   \\_\\____|___|_____|_____|
+
+       ____    _    __  __ _____ ____
+      / ___|  / \\  |  \\/  | ____/ ___|
+     | |  _  / _ \\ | |\\/| |  _| \\___ \\
+     | |_| |/ ___ \\| |  | | |___ ___) |
+      \\____/_/   \\_\\_|  |_|_____|____/
+`;
+
+  const BOOT_LINES = [
+    ['BIOS v3.14.159 - FLY AGILE SYSTEMS', 'line-dim'],
+    ['Memory test.......... 640K OK', 'line-dim'],
+    ['Checking peripherals. OK', 'line-dim'],
+    ['', ''],
+    ['Loading FLYOS v2.7.1...', ''],
+    ['Mounting /dev/games............. OK', 'line-dim'],
+    ['Initializing network stack..... OK', 'line-dim'],
+    ['Starting game daemon........... OK', 'line-dim'],
+    ['Authenticating user............ GUEST', 'line-dim'],
+    ['', ''],
+  ];
+
+  const STATUS_HEADER = '> SYSTEM STATUS';
+  const SEPARATOR = '='.repeat(58);
+
+  async function bootSequence() {
+    await pause(600);
+
+    // Boot lines - typed fast
+    for (const [text, cls] of BOOT_LINES) {
+      if (text === '') {
+        addLineInstant('\n', cls);
+        await pause(LINE_DELAY);
+      } else {
+        await addLine(text, cls);
+        await pause(LINE_DELAY);
+      }
+    }
+
+    await pause(300);
+
+    // ASCII banner - instant display
+    const bannerSpan = document.createElement('span');
+    bannerSpan.className = 'line line-bright ascii-art';
+    bannerSpan.style.fontSize = '16px';
+    bannerSpan.style.lineHeight = '1.1';
+    bannerSpan.textContent = ASCII_BANNER;
+    output.appendChild(bannerSpan);
+    scrollToBottom();
+
+    await pause(500);
+
+    addLineInstant('\n');
+    await addLine(STATUS_HEADER, 'line-bright');
+    await pause(150);
+    addLineInstant(SEPARATOR, 'line-dim');
+    addLineInstant('\n');
+
+    await pause(200);
+
+    // Game entries
+    await addGameEntry(
+      '001',
+      'LA CHAMBRE FROIDE',
+      'Puzzle mathematique retro-terminal',
+      true,
+      GAMES['1']
+    );
+
+    await pause(150);
+
+    await addGameEntry(
+      '002',
+      'HOTPLATE',
+      'Jeu de cuisine collaboratif pixel art',
+      true,
+      GAMES['2']
+    );
+
+    await pause(150);
+
+    await addGameEntry(
+      '003',
+      'RABBITS & HATS',
+      'Puzzle multijoueur strategie',
+      false,
+      null
+    );
+
+    await pause(200);
+
+    addLineInstant('\n');
+    addLineInstant(SEPARATOR, 'line-dim');
+    addLineInstant('\n');
+    await addLine('3 modules loaded. 2 online. 1 pending deployment.', 'line-dim');
+    addLineInstant('\n');
+    await addLine('Type game ID (1-3) to launch, or click [> LAUNCH]', '');
+    addLineInstant('\n');
+
+    // Show prompt
+    promptSection.style.display = 'block';
+    scrollToBottom();
+
+    // Enable keyboard input
+    enableInput();
+  }
+
+  async function addGameEntry(id, name, desc, online, url) {
+    const dots = '.'.repeat(Math.max(2, 40 - name.length));
+    const statusText = online
+      ? '<span class="status-online">[ONLINE]</span>'
+      : '<span class="status-offline">[OFFLINE]</span>';
+
+    const actionHtml = online
+      ? ` <a class="launch-btn" href="${url}" title="Launch ${name}">&gt; LAUNCH</a>`
+      : ' <span class="locked-label">&gt; LOCKED</span>';
+
+    const line1 = `[${id}] ${name} ${dots} ${statusText}${actionHtml}`;
+    await addLine(line1, 'game-entry');
+
+    const descLine = `      "${desc}"`;
+    await addLine(descLine, 'line-dim');
+  }
+
+  function enableInput() {
+    // Focus the hidden input
+    cmdInput.style.pointerEvents = 'auto';
+    cmdInput.focus();
+
+    // Refocus on any click
+    document.addEventListener('click', function(e) {
+      if (e.target.tagName !== 'A') {
+        cmdInput.focus();
+      }
+    });
+
+    cmdInput.addEventListener('input', function() {
+      typedCmd.textContent = cmdInput.value;
+      scrollToBottom();
+    });
+
+    cmdInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        const val = cmdInput.value.trim();
+        handleCommand(val);
+        cmdInput.value = '';
+        typedCmd.textContent = '';
+      }
+      // Limit input length
+      if (cmdInput.value.length > 20 && e.key !== 'Backspace' && e.key !== 'Delete') {
+        e.preventDefault();
+      }
+    });
+  }
+
+  async function handleCommand(cmd) {
+    // Echo the command
+    addLineInstant(`> ${cmd}`, '');
+
+    if (cmd === '1' || cmd === '2') {
+      const name = cmd === '1' ? 'LA CHAMBRE FROIDE' : 'HOTPLATE';
+      await addLine(`Launching ${name}...`, 'line-bright');
+      await pause(400);
+      window.location.href = GAMES[cmd];
+    } else if (cmd === '3') {
+      await addLine('ERROR: Module RABBITS & HATS is OFFLINE.', 'status-offline');
+      await addLine('Deployment pending. Check back soon.', 'line-dim');
+      addLineInstant('\n');
+    } else if (cmd.toLowerCase() === 'help') {
+      await addLine('Available commands: 1, 2, 3, help, status', 'line-dim');
+      addLineInstant('\n');
+    } else if (cmd.toLowerCase() === 'status') {
+      await addLine('[001] LA CHAMBRE FROIDE .. ONLINE', '');
+      await addLine('[002] HOTPLATE .......... ONLINE', '');
+      await addLine('[003] RABBITS & HATS .... OFFLINE', 'status-offline');
+      addLineInstant('\n');
+    } else if (cmd !== '') {
+      await addLine(`Unknown command: "${cmd}". Type "help" for options.`, 'line-dim');
+      addLineInstant('\n');
+    }
+
+    scrollToBottom();
+  }
+
+  // Start boot sequence
+  bootSequence();
+})();
+</script>
+</body>
+</html>

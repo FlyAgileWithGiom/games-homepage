@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fly Agile Games - Arcade Cabinet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --neon-green: #39ff14;
+            --neon-cyan: #00ffff;
+            --neon-amber: #ffbf00;
+            --neon-pink: #ff6ec7;
+            --dark-bg: #0a0a1a;
+            --cabinet-bg: #12122a;
+            --screen-bg: #0d0d2b;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: var(--dark-bg);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* CRT Scanlines Overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15) 0px,
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Stars background */
+        .stars {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .stars span {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+        }
+
+        .title {
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            color: var(--neon-cyan);
+            text-shadow:
+                0 0 10px var(--neon-cyan),
+                0 0 20px var(--neon-cyan),
+                0 0 40px var(--neon-cyan),
+                0 0 80px rgba(0, 255, 255, 0.4);
+            animation: neonFlicker 4s ease-in-out infinite;
+            letter-spacing: 4px;
+        }
+
+        @keyframes neonFlicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow:
+                    0 0 10px var(--neon-cyan),
+                    0 0 20px var(--neon-cyan),
+                    0 0 40px var(--neon-cyan),
+                    0 0 80px rgba(0, 255, 255, 0.4);
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+                opacity: 0.8;
+            }
+        }
+
+        .subtitle {
+            font-size: clamp(0.6rem, 2vw, 0.9rem);
+            color: var(--neon-amber);
+            margin-top: 1.5rem;
+            text-shadow: 0 0 10px var(--neon-amber), 0 0 20px rgba(255, 191, 0, 0.5);
+            animation: blink 1.5s step-end infinite;
+            letter-spacing: 3px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .credit-line {
+            font-size: 0.5rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 1rem;
+            letter-spacing: 2px;
+        }
+
+        /* Game Cards Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        /* Arcade Cabinet Card */
+        .cabinet {
+            background: var(--cabinet-bg);
+            border-radius: 16px 16px 8px 8px;
+            padding: 0;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .cabinet:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .cabinet--green { --accent: var(--neon-green); }
+        .cabinet--amber { --accent: var(--neon-amber); }
+        .cabinet--pink { --accent: var(--neon-pink); }
+
+        .cabinet:hover {
+            box-shadow:
+                0 0 15px var(--accent),
+                0 0 30px rgba(0, 0, 0, 0.5),
+                inset 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Cabinet top marquee */
+        .cabinet-marquee {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            border-bottom: 3px solid var(--accent);
+            padding: 1.2rem 1rem 0.8rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .cabinet-marquee::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+        }
+
+        .game-name {
+            font-size: clamp(0.65rem, 1.8vw, 0.85rem);
+            color: var(--accent);
+            text-shadow: 0 0 8px var(--accent);
+            letter-spacing: 2px;
+        }
+
+        /* Screen area */
+        .cabinet-screen {
+            background: var(--screen-bg);
+            margin: 1rem;
+            border-radius: 8px;
+            padding: 1.5rem 1rem;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Screen glow */
+        .cabinet-screen::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), transparent, var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .cabinet:hover .cabinet-screen::before {
+            opacity: 0.3;
+        }
+
+        .game-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+
+        .game-desc {
+            font-size: 0.5rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+        }
+
+        /* Status badge */
+        .status {
+            display: inline-block;
+            font-size: 0.45rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .status--live {
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(57, 255, 20, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(57, 255, 20, 0.6); }
+        }
+
+        .status--soon {
+            color: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Controls area */
+        .cabinet-controls {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .btn-coin {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.2s ease;
+            text-shadow: 0 0 5px var(--accent);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-coin:hover {
+            background: var(--accent);
+            color: var(--dark-bg);
+            text-shadow: none;
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        .btn-coin:active {
+            transform: scale(0.95);
+        }
+
+        .btn-coin--disabled {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.3);
+            text-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-coin--disabled:hover {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+            box-shadow: none;
+        }
+
+        /* Cabinet bottom screws */
+        .cabinet-base {
+            height: 12px;
+            background: linear-gradient(180deg, var(--cabinet-bg), #0a0a18);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+        }
+
+        .screw {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #444, #222);
+            border: 1px solid #555;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            font-size: 0.45rem;
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 2px;
+        }
+
+        /* Disabled cabinet */
+        .cabinet--disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .cabinet--disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .container {
+                padding: 1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="title">FLY AGILE GAMES</h1>
+            <p class="subtitle">&#9654; SELECT YOUR GAME &#9664;</p>
+            <p class="credit-line">PRESS START TO PLAY</p>
+        </header>
+
+        <div class="games-grid">
+            <!-- La Chambre Froide -->
+            <a href="https://chambre-froide.flyagile.com" class="cabinet cabinet--green">
+                <div class="cabinet-marquee">
+                    <div class="game-name">LA CHAMBRE FROIDE</div>
+                </div>
+                <div class="cabinet-screen">
+                    <div class="game-icon">&#10052;</div>
+                    <p class="game-desc">Puzzle math&eacute;matique<br>r&eacute;tro-terminal</p>
+                    <span class="status status--live">&#9679; LIVE</span>
+                </div>
+                <div class="cabinet-controls">
+                    <button class="btn-coin">INSERT COIN</button>
+                </div>
+                <div class="cabinet-base">
+                    <span class="screw"></span>
+                    <span class="screw"></span>
+                </div>
+            </a>
+
+            <!-- Hotplate -->
+            <a href="https://hotplate.flyagile.com" class="cabinet cabinet--amber">
+                <div class="cabinet-marquee">
+                    <div class="game-name">HOTPLATE</div>
+                </div>
+                <div class="cabinet-screen">
+                    <div class="game-icon">&#127860;</div>
+                    <p class="game-desc">Jeu de cuisine<br>collaboratif pixel art</p>
+                    <span class="status status--live">&#9679; LIVE</span>
+                </div>
+                <div class="cabinet-controls">
+                    <button class="btn-coin">INSERT COIN</button>
+                </div>
+                <div class="cabinet-base">
+                    <span class="screw"></span>
+                    <span class="screw"></span>
+                </div>
+            </a>
+
+            <!-- Rabbits & Hats -->
+            <div class="cabinet cabinet--pink cabinet--disabled">
+                <div class="cabinet-marquee">
+                    <div class="game-name">RABBITS &amp; HATS</div>
+                </div>
+                <div class="cabinet-screen">
+                    <div class="game-icon">&#128007;</div>
+                    <p class="game-desc">Puzzle multijoueur<br>strat&eacute;gie</p>
+                    <span class="status status--soon">COMING SOON</span>
+                </div>
+                <div class="cabinet-controls">
+                    <button class="btn-coin btn-coin--disabled" disabled>OUT OF ORDER</button>
+                </div>
+                <div class="cabinet-base">
+                    <span class="screw"></span>
+                    <span class="screw"></span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            &copy; 2026 FLY AGILE &mdash; ALL RIGHTS RESERVED
+        </footer>
+    </div>
+
+    <script>
+        // Generate random stars
+        const starsEl = document.getElementById('stars');
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('span');
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (2 + Math.random() * 3) + 's';
+            star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
+            starsEl.appendChild(star);
+        }
+    </script>
+</body>
+</html>
