@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fly Agile Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Silkscreen', cursive;
+    background: #0d180d;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 40px 20px 10px;
+    position: relative;
+    z-index: 10;
+  }
+  header h1 {
+    font-size: 36px;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(76,175,80,0.4);
+  }
+  header p {
+    font-size: 13px;
+    color: #4CAF50;
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Scene ── */
+  .scene-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    position: relative;
+    margin-top: 20px;
+    padding-bottom: 80px;
+  }
+
+  .sky {
+    position: absolute;
+    top: -140px;
+    left: 0;
+    right: 0;
+    height: 500px;
+    background: linear-gradient(180deg, #0d180d 0%, #121e12 20%, #162016 40%, #1a2e1a 70%, #1f3a1f 100%);
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* Stars */
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 5s ease-in-out infinite;
+  }
+  .star:nth-child(1) { top: 20px; left: 8%; animation-delay: 0s; }
+  .star:nth-child(2) { top: 45px; left: 22%; animation-delay: 1.2s; }
+  .star:nth-child(3) { top: 15px; left: 38%; animation-delay: 0.6s; width: 3px; height: 3px; }
+  .star:nth-child(4) { top: 55px; left: 52%; animation-delay: 2.1s; }
+  .star:nth-child(5) { top: 25px; left: 65%; animation-delay: 0.3s; }
+  .star:nth-child(6) { top: 50px; left: 78%; animation-delay: 1.8s; width: 3px; height: 3px; }
+  .star:nth-child(7) { top: 10px; left: 90%; animation-delay: 0.9s; }
+  .star:nth-child(8) { top: 65px; left: 15%; animation-delay: 3.5s; }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* Clouds */
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.04);
+    border-radius: 20px;
+    z-index: 1;
+  }
+  .cloud-1 {
+    width: 120px; height: 20px;
+    top: 40px;
+    animation: drift 90s linear infinite;
+  }
+  .cloud-2 {
+    width: 80px; height: 14px;
+    top: 70px;
+    animation: drift 110s linear infinite;
+    animation-delay: -30s;
+  }
+  @keyframes drift {
+    0% { left: -150px; }
+    100% { left: calc(100% + 150px); }
+  }
+
+  /* Ground / Grass */
+  .ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(180deg, #1a3a1a 0%, #0f260f 100%);
+    z-index: 1;
+  }
+  .ground::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, #2d5a2d 0px, #2d5a2d 4px, #1a3a1a 4px, #1a3a1a 8px);
+    image-rendering: pixelated;
+  }
+
+  /* ── Buildings Row ── */
+  .buildings {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    position: relative;
+    z-index: 5;
+    padding: 60px 20px 0;
+    align-items: flex-end;
+  }
+
+  /* ── Building Card ── */
+  .building-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.4s ease, filter 0.4s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .building-card:hover {
+    transform: translateY(-6px);
+  }
+  .building-card.disabled {
+    cursor: default;
+    opacity: 0.75;
+  }
+  .building-card.disabled:hover {
+    transform: none;
+  }
+
+  /* Building Structure */
+  .building {
+    position: relative;
+    image-rendering: pixelated;
+  }
+
+  /* ── CHAMBRE FROIDE (Ice Building) ── */
+  .building--ice {
+    width: 160px;
+    height: 200px;
+    background: linear-gradient(180deg, #8ba8c4 0%, #9bb8d4 30%, #7a98b4 60%, #6a88a4 100%);
+    border: 3px solid #5a7894;
+    position: relative;
+  }
+  /* Frost texture on edges */
+  .building--ice::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: repeating-linear-gradient(90deg,
+      rgba(200,230,255,0.6) 0px, rgba(200,230,255,0.6) 6px,
+      rgba(160,200,240,0.3) 6px, rgba(160,200,240,0.3) 12px);
+  }
+  /* Ice crystal accents */
+  .building--ice::after {
+    content: '';
+    position: absolute;
+    top: 8px; left: 4px; right: 4px; bottom: 4px;
+    border: 2px dashed rgba(200,230,255,0.15);
+  }
+  /* Roof */
+  .ice-roof {
+    width: 180px;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 30px solid #6a88a4;
+    position: relative;
+    margin-bottom: -1px;
+  }
+  .ice-roof::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: -12px;
+    width: 164px;
+    height: 4px;
+    background: #5a7894;
+  }
+  /* Frost icicles */
+  .icicles {
+    display: flex;
+    justify-content: space-around;
+    width: 140px;
+    position: absolute;
+    top: 30px;
+    left: 0;
+  }
+  .icicle {
+    width: 4px;
+    background: linear-gradient(180deg, rgba(180,220,255,0.8), rgba(180,220,255,0.1));
+  }
+  .icicle:nth-child(1) { height: 12px; }
+  .icicle:nth-child(2) { height: 8px; }
+  .icicle:nth-child(3) { height: 14px; }
+  .icicle:nth-child(4) { height: 6px; }
+  .icicle:nth-child(5) { height: 10px; }
+  .icicle:nth-child(6) { height: 8px; }
+
+  /* Snowflake display window */
+  .ice-window {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(100,180,255,0.3) 0%, rgba(40,80,120,0.6) 100%);
+    border: 3px solid #4a7090;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(100,180,255,0.3), inset 0 0 10px rgba(100,180,255,0.2);
+    transition: box-shadow 0.4s ease;
+  }
+  .building-card:hover .ice-window {
+    box-shadow: 0 0 25px rgba(100,180,255,0.6), inset 0 0 15px rgba(100,180,255,0.4);
+  }
+
+  /* Snowflake sprite (CSS pixel art) */
+  .snowflake-sprite {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    filter: drop-shadow(0 0 6px rgba(180,220,255,0.5));
+    transition: filter 0.4s ease;
+  }
+  .building-card:hover .snowflake-sprite {
+    filter: drop-shadow(0 0 12px rgba(180,220,255,0.9));
+  }
+  .snowflake-sprite::before,
+  .snowflake-sprite::after {
+    content: '';
+    position: absolute;
+  }
+  /* Using box-shadow pixel art for snowflake */
+  .sf-core {
+    position: absolute;
+    width: 4px; height: 4px;
+    top: 28px; left: 28px;
+    background: #e0f0ff;
+    box-shadow:
+      /* Center */
+      0 0 0 #e0f0ff,
+      /* Vertical arm */
+      0 -4px 0 #e0f0ff, 0 -8px 0 #e0f0ff, 0 -12px 0 #c0e0ff, 0 -16px 0 #a0d0ff, 0 -20px 0 #80c0ff,
+      0 4px 0 #e0f0ff, 0 8px 0 #e0f0ff, 0 12px 0 #c0e0ff, 0 16px 0 #a0d0ff, 0 20px 0 #80c0ff,
+      /* Horizontal arm */
+      -4px 0 0 #e0f0ff, -8px 0 0 #e0f0ff, -12px 0 0 #c0e0ff, -16px 0 0 #a0d0ff, -20px 0 0 #80c0ff,
+      4px 0 0 #e0f0ff, 8px 0 0 #e0f0ff, 12px 0 0 #c0e0ff, 16px 0 0 #a0d0ff, 20px 0 0 #80c0ff,
+      /* Diagonal branches */
+      -4px -4px 0 #d0e8ff, -8px -8px 0 #b0d0ff, -12px -12px 0 #90c0ff,
+      4px -4px 0 #d0e8ff, 8px -8px 0 #b0d0ff, 12px -12px 0 #90c0ff,
+      -4px 4px 0 #d0e8ff, -8px 8px 0 #b0d0ff, -12px 12px 0 #90c0ff,
+      4px 4px 0 #d0e8ff, 8px 8px 0 #b0d0ff, 12px 12px 0 #90c0ff,
+      /* Branch tips */
+      -16px -8px 0 #80c0ff, -8px -16px 0 #80c0ff,
+      16px -8px 0 #80c0ff, 8px -16px 0 #80c0ff,
+      -16px 8px 0 #80c0ff, -8px 16px 0 #80c0ff,
+      16px 8px 0 #80c0ff, 8px 16px 0 #80c0ff;
+  }
+
+  /* Ice door */
+  .ice-door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 44px;
+    background: linear-gradient(180deg, #3a6080 0%, #2a4a60 100%);
+    border: 2px solid #4a7090;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+  }
+  .ice-door::after {
+    content: '';
+    position: absolute;
+    top: 18px; right: 4px;
+    width: 4px; height: 4px;
+    background: #8ac0e0;
+    border-radius: 50%;
+  }
+
+  /* Side windows */
+  .ice-side-window {
+    position: absolute;
+    width: 20px;
+    height: 24px;
+    background: rgba(80,150,220,0.3);
+    border: 2px solid #4a7090;
+  }
+  .ice-side-window.left { top: 120px; left: 16px; }
+  .ice-side-window.right { top: 120px; right: 16px; }
+
+
+  /* ── HOTPLATE (Kitchen Building) ── */
+  .building--kitchen {
+    width: 170px;
+    height: 190px;
+    background: linear-gradient(180deg, #8b6848 0%, #7a5a3c 40%, #6a4c30 100%);
+    border: 3px solid #5a3e24;
+    position: relative;
+  }
+  /* Wood plank texture */
+  .building--kitchen::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg,
+      transparent 0px, transparent 18px,
+      rgba(0,0,0,0.1) 18px, rgba(0,0,0,0.1) 20px);
+  }
+
+  /* Red awning */
+  .kitchen-awning {
+    width: 190px;
+    height: 24px;
+    background: repeating-linear-gradient(90deg, #c0392b 0px, #c0392b 12px, #a0301f 12px, #a0301f 24px);
+    border: 2px solid #8a2216;
+    position: relative;
+    margin-bottom: -1px;
+    border-radius: 2px;
+  }
+  .kitchen-awning::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: repeating-linear-gradient(90deg,
+      transparent 0px, transparent 8px,
+      #c0392b 8px, #c0392b 10px,
+      transparent 10px, transparent 18px);
+  }
+
+  /* Chimney */
+  .chimney {
+    position: absolute;
+    top: -28px;
+    right: 20px;
+    width: 22px;
+    height: 28px;
+    background: #5a3e24;
+    border: 2px solid #4a3018;
+    z-index: 2;
+  }
+  .chimney::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -3px;
+    width: 28px;
+    height: 6px;
+    background: #4a3018;
+  }
+
+  /* Smoke */
+  .smoke-container {
+    position: absolute;
+    top: -60px;
+    right: 18px;
+    width: 30px;
+    height: 40px;
+  }
+  .smoke-puff {
+    position: absolute;
+    background: rgba(200,200,200,0.15);
+    border-radius: 50%;
+    animation: rise 4s ease-out infinite;
+  }
+  .smoke-puff:nth-child(1) { width: 8px; height: 8px; bottom: 0; left: 10px; animation-delay: 0s; }
+  .smoke-puff:nth-child(2) { width: 10px; height: 10px; bottom: 0; left: 8px; animation-delay: 1.3s; }
+  .smoke-puff:nth-child(3) { width: 6px; height: 6px; bottom: 0; left: 14px; animation-delay: 2.6s; }
+  @keyframes rise {
+    0% { transform: translateY(0) scale(1); opacity: 0.3; }
+    50% { opacity: 0.15; }
+    100% { transform: translateY(-40px) translateX(-8px) scale(2); opacity: 0; }
+  }
+
+  /* Frying pan sign (hangs above door) */
+  .pan-sign {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Sign bracket */
+  .pan-sign::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #3a2a18;
+  }
+  /* Frying pan pixel art using box-shadow */
+  .pan-sprite {
+    position: relative;
+    width: 4px; height: 4px;
+    background: transparent;
+  }
+  .pan-pixels {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: #666;
+    box-shadow:
+      /* Pan body (circle-ish) */
+      4px 0 0 #555, 8px 0 0 #555, 12px 0 0 #555,
+      0 4px 0 #555, 4px 4px 0 #666, 8px 4px 0 #777, 12px 4px 0 #666, 16px 4px 0 #555,
+      -4px 8px 0 #555, 0 8px 0 #666, 4px 8px 0 #888, 8px 8px 0 #999, 12px 8px 0 #888, 16px 8px 0 #666, 20px 8px 0 #555,
+      -4px 12px 0 #555, 0 12px 0 #666, 4px 12px 0 #888, 8px 12px 0 #aaa, 12px 12px 0 #888, 16px 12px 0 #666, 20px 12px 0 #555,
+      -4px 16px 0 #555, 0 16px 0 #666, 4px 16px 0 #888, 8px 16px 0 #999, 12px 16px 0 #888, 16px 16px 0 #666, 20px 16px 0 #555,
+      0 20px 0 #555, 4px 20px 0 #666, 8px 20px 0 #777, 12px 20px 0 #666, 16px 20px 0 #555,
+      4px 24px 0 #555, 8px 24px 0 #555, 12px 24px 0 #555,
+      /* Handle */
+      24px 12px 0 #8B4513, 28px 12px 0 #8B4513, 32px 12px 0 #8B4513, 36px 12px 0 #8B4513, 40px 12px 0 #8B4513,
+      24px 16px 0 #6B3410, 28px 16px 0 #6B3410, 32px 16px 0 #6B3410, 36px 16px 0 #6B3410, 40px 16px 0 #6B3410,
+      /* Food in pan */
+      4px 8px 0 #e8a030, 8px 12px 0 #e0c040, 12px 8px 0 #d09028;
+    filter: drop-shadow(0 0 4px rgba(255,180,50,0.4));
+    transition: filter 0.4s ease;
+  }
+  .building-card:hover .pan-pixels {
+    filter: drop-shadow(0 0 8px rgba(255,180,50,0.8));
+  }
+
+  /* Kitchen windows with warm glow */
+  .kitchen-window {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background: rgba(255,160,40,0.3);
+    border: 2px solid #5a3e24;
+    animation: firelight 4s ease-in-out infinite;
+  }
+  .kitchen-window.left { top: 100px; left: 18px; }
+  .kitchen-window.right { top: 100px; right: 18px; }
+  @keyframes firelight {
+    0%, 100% { background: rgba(255,160,40,0.25); box-shadow: 0 0 8px rgba(255,120,20,0.2); }
+    50% { background: rgba(255,180,60,0.4); box-shadow: 0 0 16px rgba(255,140,30,0.4); }
+  }
+  .building-card:hover .kitchen-window {
+    animation: firelight-bright 3s ease-in-out infinite;
+  }
+  @keyframes firelight-bright {
+    0%, 100% { background: rgba(255,180,60,0.4); box-shadow: 0 0 12px rgba(255,140,30,0.4); }
+    50% { background: rgba(255,200,80,0.6); box-shadow: 0 0 24px rgba(255,160,40,0.6); }
+  }
+
+  /* Kitchen door */
+  .kitchen-door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 50px;
+    background: linear-gradient(180deg, #4a3018 0%, #3a2410 100%);
+    border: 2px solid #2a1808;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+  }
+  .kitchen-door::after {
+    content: '';
+    position: absolute;
+    top: 22px; right: 5px;
+    width: 4px; height: 4px;
+    background: #c0a060;
+    border-radius: 50%;
+  }
+
+  /* ── RABBITS & HATS (Magic Castle) ── */
+  .building--magic {
+    width: 160px;
+    height: 195px;
+    background: linear-gradient(180deg, #5a3a6a 0%, #4a2a5a 40%, #3a1a4a 100%);
+    border: 3px solid #2a1040;
+    position: relative;
+  }
+  /* Stone texture */
+  .building--magic::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      repeating-linear-gradient(0deg,
+        transparent 0px, transparent 22px,
+        rgba(0,0,0,0.15) 22px, rgba(0,0,0,0.15) 24px),
+      repeating-linear-gradient(90deg,
+        transparent 0px, transparent 30px,
+        rgba(0,0,0,0.08) 30px, rgba(0,0,0,0.08) 32px);
+  }
+
+  /* Castle turrets */
+  .turret {
+    position: absolute;
+    top: -20px;
+    width: 20px;
+    height: 20px;
+    background: #4a2a5a;
+    border: 2px solid #2a1040;
+  }
+  .turret::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 10px solid #5a3a6a;
+  }
+  .turret.left { left: 4px; }
+  .turret.right { right: 4px; }
+  /* Center turret taller */
+  .turret.center {
+    left: 50%;
+    transform: translateX(-50%);
+    top: -30px;
+    width: 24px;
+    height: 30px;
+  }
+  .turret.center::before {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 14px solid #6a4a7a;
+  }
+
+  /* Battlements */
+  .battlements {
+    position: absolute;
+    top: -6px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(90deg,
+      #4a2a5a 0px, #4a2a5a 10px,
+      transparent 10px, transparent 16px);
+  }
+
+  /* Magic crystal ball window with rabbit sprite */
+  .magic-window {
+    position: absolute;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 76px;
+    height: 76px;
+    background: radial-gradient(circle, rgba(180,100,255,0.2) 0%, rgba(80,30,120,0.5) 60%, rgba(40,10,60,0.7) 100%);
+    border: 3px solid #6a3a8a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(150,80,220,0.3), inset 0 0 10px rgba(150,80,220,0.15);
+    transition: box-shadow 0.4s ease;
+    overflow: hidden;
+  }
+  .building-card:hover .magic-window {
+    box-shadow: 0 0 25px rgba(150,80,220,0.5), inset 0 0 15px rgba(150,80,220,0.3);
+  }
+
+  /* Rabbit-in-hat pixel art */
+  .rabbit-sprite {
+    position: relative;
+    width: 4px; height: 4px;
+    background: transparent;
+  }
+  .rabbit-pixels {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: #eee;
+    box-shadow:
+      /* Ears */
+      -8px -20px 0 #fff, -8px -16px 0 #fdd, -8px -12px 0 #fff,
+      8px -20px 0 #fff, 8px -16px 0 #fdd, 8px -12px 0 #fff,
+      /* Head */
+      -4px -8px 0 #fff, 0 -8px 0 #fff, 4px -8px 0 #fff,
+      -8px -4px 0 #fff, -4px -4px 0 #fff, 0 -4px 0 #fff, 4px -4px 0 #fff, 8px -4px 0 #fff,
+      /* Eyes */
+      -4px 0 0 #222, 0 0 0 #fff, 4px 0 0 #222,
+      /* Nose + mouth */
+      0 4px 0 #faa,
+      -4px 8px 0 #fff, 0 8px 0 #fff, 4px 8px 0 #fff,
+      /* Hat brim */
+      -16px 12px 0 #333, -12px 12px 0 #222, -8px 12px 0 #222, -4px 12px 0 #222,
+      0 12px 0 #222, 4px 12px 0 #222, 8px 12px 0 #222, 12px 12px 0 #222, 16px 12px 0 #333,
+      /* Hat body */
+      -8px 16px 0 #111, -4px 16px 0 #222, 0 16px 0 #222, 4px 16px 0 #222, 8px 16px 0 #111,
+      -8px 20px 0 #111, -4px 20px 0 #1a1a1a, 0 20px 0 #222, 4px 20px 0 #1a1a1a, 8px 20px 0 #111,
+      -8px 24px 0 #111, -4px 24px 0 #222, 0 24px 0 #222, 4px 24px 0 #222, 8px 24px 0 #111,
+      /* Hat band */
+      -8px 20px 0 #c0a020, -4px 20px 0 #d4b830, 0 20px 0 #e8cc40, 4px 20px 0 #d4b830, 8px 20px 0 #c0a020;
+    filter: drop-shadow(0 0 4px rgba(180,120,255,0.4));
+  }
+
+  /* Sparkle particles near castle */
+  .sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #c090ff;
+    border-radius: 50%;
+    animation: sparkle-float 3s ease-in-out infinite;
+    opacity: 0;
+  }
+  .sparkle:nth-child(1) { top: 20px; left: 10px; animation-delay: 0s; }
+  .sparkle:nth-child(2) { top: 60px; right: 8px; animation-delay: 1s; width: 2px; height: 2px; }
+  .sparkle:nth-child(3) { top: 100px; left: 20px; animation-delay: 2s; }
+  .sparkle:nth-child(4) { top: 40px; right: 20px; animation-delay: 1.5s; width: 2px; height: 2px; }
+  @keyframes sparkle-float {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+    50% { opacity: 0.6; transform: translateY(-10px) scale(1); }
+  }
+
+  /* Castle windows (arched) */
+  .castle-side-window {
+    position: absolute;
+    width: 18px;
+    height: 26px;
+    background: rgba(120,60,180,0.25);
+    border: 2px solid #4a2060;
+    border-radius: 9px 9px 0 0;
+  }
+  .castle-side-window.left { top: 125px; left: 16px; }
+  .castle-side-window.right { top: 125px; right: 16px; }
+
+  /* Castle door */
+  .castle-door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 48px;
+    background: linear-gradient(180deg, #2a1040 0%, #1a0830 100%);
+    border: 2px solid #3a1850;
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+  }
+  .castle-door::after {
+    content: '';
+    position: absolute;
+    top: 22px; left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    background: #c090ff;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(180,120,255,0.5);
+  }
+
+  /* Construction tape */
+  .construction-tape {
+    position: absolute;
+    bottom: 0;
+    left: -10px;
+    right: -10px;
+    height: 12px;
+    background: repeating-linear-gradient(
+      -45deg,
+      #f1c40f 0px, #f1c40f 8px,
+      #2c3e50 8px, #2c3e50 16px
+    );
+    border: 1px solid #e6b800;
+    z-index: 6;
+    image-rendering: pixelated;
+  }
+
+  /* ── Signposts ── */
+  .signpost {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  /* Wooden post */
+  .signpost::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 16px;
+    background: #6B4226;
+    border: 1px solid #4a2e18;
+    margin-bottom: -2px;
+  }
+  .sign-board {
+    background: #5a3a1e;
+    border: 2px solid #3a2410;
+    padding: 8px 14px 6px;
+    text-align: center;
+    min-width: 140px;
+    position: relative;
+    image-rendering: pixelated;
+  }
+  .sign-board::before,
+  .sign-board::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    width: 6px;
+    height: 6px;
+    background: #8B6914;
+    border-radius: 50%;
+    border: 1px solid #6B4B10;
+  }
+  .sign-board::before { left: 6px; }
+  .sign-board::after { right: 6px; }
+
+  .sign-name {
+    font-family: 'Silkscreen', cursive;
+    font-size: 11px;
+    color: #fff;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  }
+  .sign-desc {
+    font-family: 'Silkscreen', cursive;
+    font-size: 8px;
+    color: #a0a0a0;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  /* Status indicator */
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 9px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  .status-dot.live {
+    background: #4CAF50;
+    box-shadow: 0 0 6px rgba(76,175,80,0.5);
+  }
+  .status-dot.soon {
+    background: #888;
+    box-shadow: none;
+    animation: none;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  .status-label { color: #888; }
+  .status-label.live { color: #7ec882; }
+  .status-label.soon { color: #666; font-style: italic; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 30px 20px 40px;
+    z-index: 10;
+    position: relative;
+  }
+  footer p {
+    font-size: 10px;
+    color: #3a5a3a;
+    letter-spacing: 1px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .buildings {
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+    header h1 {
+      font-size: 24px;
+    }
+    .sky {
+      height: 300px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>FLY AGILE GAMES</h1>
+    <p>Des jeux collaboratifs pour vos equipes</p>
+  </header>
+
+  <div class="scene-wrapper">
+    <!-- Sky with stars -->
+    <div class="sky">
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+    </div>
+
+    <!-- Buildings -->
+    <div class="buildings">
+
+      <!-- 1. La Chambre Froide -->
+      <a href="https://chambre-froide.flyagile.com" class="building-card">
+        <div class="ice-roof">
+          <div class="icicles">
+            <div class="icicle"></div>
+            <div class="icicle"></div>
+            <div class="icicle"></div>
+            <div class="icicle"></div>
+            <div class="icicle"></div>
+            <div class="icicle"></div>
+          </div>
+        </div>
+        <div class="building building--ice">
+          <div class="ice-window">
+            <div class="snowflake-sprite">
+              <div class="sf-core"></div>
+            </div>
+          </div>
+          <div class="ice-side-window left"></div>
+          <div class="ice-side-window right"></div>
+          <div class="ice-door"></div>
+        </div>
+        <div class="signpost">
+          <div class="sign-board">
+            <div class="sign-name">La Chambre Froide</div>
+            <div class="sign-desc">Puzzle mathematique</div>
+          </div>
+        </div>
+        <div class="status">
+          <div class="status-dot live"></div>
+          <span class="status-label live">LIVE</span>
+        </div>
+      </a>
+
+      <!-- 2. Hotplate -->
+      <a href="https://hotplate.flyagile.com" class="building-card">
+        <div class="kitchen-awning"></div>
+        <div class="building building--kitchen">
+          <div class="chimney">
+            <div class="smoke-container">
+              <div class="smoke-puff"></div>
+              <div class="smoke-puff"></div>
+              <div class="smoke-puff"></div>
+            </div>
+          </div>
+          <div class="pan-sign">
+            <div class="pan-sprite">
+              <div class="pan-pixels"></div>
+            </div>
+          </div>
+          <div class="kitchen-window left"></div>
+          <div class="kitchen-window right"></div>
+          <div class="kitchen-door"></div>
+        </div>
+        <div class="signpost">
+          <div class="sign-board">
+            <div class="sign-name">Hotplate</div>
+            <div class="sign-desc">Cuisine collaborative</div>
+          </div>
+        </div>
+        <div class="status">
+          <div class="status-dot live"></div>
+          <span class="status-label live">LIVE</span>
+        </div>
+      </a>
+
+      <!-- 3. Rabbits & Hats -->
+      <div class="building-card disabled">
+        <div class="building building--magic">
+          <div class="turret left"></div>
+          <div class="turret center"></div>
+          <div class="turret right"></div>
+          <div class="battlements"></div>
+          <div class="magic-window">
+            <div class="rabbit-sprite">
+              <div class="rabbit-pixels"></div>
+            </div>
+          </div>
+          <div class="castle-side-window left"></div>
+          <div class="castle-side-window right"></div>
+          <div class="castle-door"></div>
+          <div class="sparkle"></div>
+          <div class="sparkle"></div>
+          <div class="sparkle"></div>
+          <div class="sparkle"></div>
+          <div class="construction-tape"></div>
+        </div>
+        <div class="signpost">
+          <div class="sign-board">
+            <div class="sign-name">Rabbits &amp; Hats</div>
+            <div class="sign-desc">Strategie multijoueur</div>
+          </div>
+        </div>
+        <div class="status">
+          <div class="status-dot soon"></div>
+          <span class="status-label soon">COMING SOON</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ground -->
+    <div class="ground"></div>
+  </div>
+
+  <footer>
+    <p>FLY AGILE &middot; 2026</p>
+  </footer>
+</div>
+</body>
+</html>

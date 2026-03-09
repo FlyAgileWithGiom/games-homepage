@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fly Agile Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Silkscreen', cursive;
+    background: #111;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 40px 20px 10px;
+    position: relative;
+    z-index: 10;
+  }
+  header h1 {
+    font-size: 36px;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(76,175,80,0.4);
+  }
+  header p {
+    font-size: 13px;
+    color: #7ec882;
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Scene ── */
+  .scene-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    position: relative;
+    margin-top: 20px;
+  }
+
+  .sky {
+    position: absolute;
+    top: -120px;
+    left: 0;
+    right: 0;
+    height: 400px;
+    background: linear-gradient(180deg, #0d180d 0%, #162016 30%, #1a2e1a 60%, #1f3a1f 100%);
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* Stars */
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 4s ease-in-out infinite;
+  }
+  .star:nth-child(1) { top: 20px; left: 8%; animation-delay: 0s; }
+  .star:nth-child(2) { top: 45px; left: 22%; animation-delay: 1.2s; }
+  .star:nth-child(3) { top: 15px; left: 38%; animation-delay: 0.6s; }
+  .star:nth-child(4) { top: 55px; left: 52%; animation-delay: 2.1s; }
+  .star:nth-child(5) { top: 25px; left: 65%; animation-delay: 0.3s; }
+  .star:nth-child(6) { top: 50px; left: 78%; animation-delay: 1.8s; }
+  .star:nth-child(7) { top: 10px; left: 90%; animation-delay: 0.9s; }
+  .star:nth-child(8) { top: 65px; left: 15%; animation-delay: 2.5s; }
+  .star:nth-child(9) { top: 35px; left: 48%; animation-delay: 1.5s; }
+  .star:nth-child(10) { top: 70px; left: 85%; animation-delay: 3.2s; }
+  .star:nth-child(11) { top: 8px; left: 55%; animation-delay: 0.4s; width: 3px; height: 3px; }
+  .star:nth-child(12) { top: 42px; left: 72%; animation-delay: 2.8s; width: 3px; height: 3px; }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* Clouds */
+  .cloud {
+    position: absolute;
+    width: 80px;
+    height: 20px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    top: 40px;
+    animation: drift 70s linear infinite;
+  }
+  .cloud::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    top: -8px;
+    left: 20px;
+  }
+  .cloud:nth-child(14) {
+    top: 70px;
+    width: 60px;
+    height: 16px;
+    animation-duration: 90s;
+    animation-delay: -30s;
+    opacity: 0.7;
+  }
+  @keyframes drift {
+    0% { left: -100px; }
+    100% { left: calc(100% + 100px); }
+  }
+
+  /* ── Ground ── */
+  .ground {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding-top: 280px;
+  }
+  .grass {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background: linear-gradient(180deg, #1a3a1a 0%, #153015 40%, #112611 100%);
+    z-index: 0;
+  }
+  .grass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #2a5a2a;
+  }
+
+  /* Path */
+  .path {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 20px;
+    z-index: 1;
+  }
+  .path::before {
+    content: '';
+    position: absolute;
+    bottom: 30px;
+    left: 5%;
+    right: 5%;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, #2a4a2a 0px, #2a4a2a 12px, #1a3a1a 12px, #1a3a1a 16px);
+    image-rendering: pixelated;
+  }
+
+  /* ── Game Cards ── */
+  .games {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    position: relative;
+    z-index: 5;
+    padding: 0 20px;
+  }
+
+  .game-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    cursor: pointer;
+    width: 240px;
+  }
+  .game-card:hover {
+    transform: translateY(-4px);
+  }
+  .game-card:hover .building-wrap {
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+  }
+  .game-card.disabled {
+    cursor: default;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .building-wrap {
+    position: relative;
+    image-rendering: pixelated;
+    transition: filter 0.3s ease;
+  }
+
+  /* ── Game info below building ── */
+  .game-info {
+    text-align: center;
+    margin-top: 16px;
+    padding: 12px 16px;
+  }
+  .sprite-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    image-rendering: pixelated;
+  }
+  .game-name {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .game-desc {
+    font-size: 11px;
+    color: #7ec882;
+    margin-bottom: 8px;
+  }
+  .status {
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4CAF50;
+    box-shadow: 0 0 6px #4CAF50;
+  }
+  .status-live { color: #4CAF50; }
+  .status-soon { color: #777; }
+
+  /* ── BUILDING 1: La Chambre Froide ── */
+  .building-froide {
+    width: 140px;
+    height: 160px;
+    position: relative;
+  }
+
+  /* Roof - triangular with snow */
+  .froide-roof {
+    position: absolute;
+    top: 0;
+    left: 10px;
+    width: 0;
+    height: 0;
+    border-left: 60px solid transparent;
+    border-right: 60px solid transparent;
+    border-bottom: 50px solid #556677;
+  }
+  .froide-roof::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: -50px;
+    width: 100px;
+    height: 8px;
+    background: #ddeeff;
+    border-radius: 2px;
+  }
+  /* Snow cap on peak */
+  .froide-snow {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 10px;
+    background: #eef6ff;
+    border-radius: 4px 4px 0 0;
+    z-index: 1;
+  }
+
+  /* Walls */
+  .froide-walls {
+    position: absolute;
+    top: 50px;
+    left: 15px;
+    width: 110px;
+    height: 110px;
+    background: linear-gradient(180deg, #667788 0%, #556677 100%);
+    border: 2px solid #445566;
+  }
+
+  /* Windows */
+  .froide-window {
+    position: absolute;
+    width: 20px;
+    height: 24px;
+    background: #88ccff;
+    border: 2px solid #445566;
+    box-shadow: 0 0 8px rgba(136,204,255,0.4), inset 0 0 4px rgba(136,204,255,0.3);
+  }
+  .froide-window-l { top: 70px; left: 35px; }
+  .froide-window-r { top: 70px; right: 35px; }
+  .froide-window::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: #445566;
+    transform: translateX(-50%);
+  }
+
+  /* Door */
+  .froide-door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 34px;
+    background: #4a5a6a;
+    border: 2px solid #445566;
+    border-bottom: none;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .froide-door::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 4px;
+    width: 4px;
+    height: 4px;
+    background: #88bbcc;
+    border-radius: 50%;
+  }
+  .game-card:hover .froide-door {
+    background: #5a7a8a;
+    box-shadow: 0 0 12px rgba(136,204,255,0.5);
+  }
+
+  /* Icicles */
+  .froide-icicles {
+    position: absolute;
+    top: 48px;
+    left: 20px;
+    width: 100px;
+    height: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+  }
+  .icicle {
+    width: 4px;
+    height: 10px;
+    background: linear-gradient(180deg, #cce8ff, #eef6ff);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+  .icicle:nth-child(2) { height: 14px; }
+  .icicle:nth-child(4) { height: 12px; }
+  .icicle:nth-child(6) { height: 8px; }
+
+  /* ── BUILDING 2: Hotplate ── */
+  .building-hotplate {
+    width: 160px;
+    height: 170px;
+    position: relative;
+  }
+
+  /* Chimney */
+  .hotplate-chimney {
+    position: absolute;
+    top: 0;
+    right: 30px;
+    width: 18px;
+    height: 40px;
+    background: #6b4a3a;
+    border: 2px solid #5a3a2a;
+    z-index: 3;
+  }
+  .hotplate-chimney::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -3px;
+    width: 24px;
+    height: 6px;
+    background: #5a3a2a;
+  }
+
+  /* Smoke */
+  .smoke-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(200,200,200,0.15);
+    border-radius: 50%;
+    animation: smoke-rise 6s ease-out infinite;
+  }
+  .smoke-particle:nth-child(1) { right: 34px; top: -5px; animation-delay: 0s; }
+  .smoke-particle:nth-child(2) { right: 38px; top: -5px; animation-delay: 2s; width: 6px; height: 6px; }
+  .smoke-particle:nth-child(3) { right: 32px; top: -5px; animation-delay: 4s; width: 10px; height: 10px; }
+
+  @keyframes smoke-rise {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.2; }
+    50% { transform: translateY(-30px) translateX(8px) scale(1.5); opacity: 0.1; }
+    100% { transform: translateY(-60px) translateX(16px) scale(2); opacity: 0; }
+  }
+
+  /* Awning */
+  .hotplate-awning {
+    position: absolute;
+    top: 30px;
+    left: 5px;
+    width: 150px;
+    height: 20px;
+    background: repeating-linear-gradient(90deg, #cc4444 0px, #cc4444 10px, #fff 10px, #fff 20px);
+    border-bottom: 3px solid #aa3333;
+    z-index: 4;
+  }
+
+  /* Walls */
+  .hotplate-walls {
+    position: absolute;
+    top: 48px;
+    left: 10px;
+    width: 140px;
+    height: 122px;
+    background: linear-gradient(180deg, #8b6b4a 0%, #7a5a3a 100%);
+    border: 2px solid #5a3a2a;
+  }
+
+  /* Windows */
+  .hotplate-window {
+    position: absolute;
+    width: 24px;
+    height: 22px;
+    background: #ffcc66;
+    border: 2px solid #5a3a2a;
+    box-shadow: 0 0 10px rgba(255,204,102,0.4), inset 0 0 4px rgba(255,170,50,0.3);
+  }
+  .hotplate-window-l { top: 68px; left: 28px; }
+  .hotplate-window-r { top: 68px; right: 28px; }
+  .hotplate-window::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: #5a3a2a;
+    transform: translateX(-50%);
+  }
+
+  /* OPEN sign */
+  .hotplate-sign {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    color: #ff6644;
+    font-size: 8px;
+    padding: 2px 6px;
+    border: 1px solid #ff6644;
+    box-shadow: 0 0 6px rgba(255,102,68,0.3);
+    z-index: 5;
+    letter-spacing: 1px;
+  }
+
+  /* Door */
+  .hotplate-door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 38px;
+    background: #5a3a2a;
+    border: 2px solid #4a2a1a;
+    border-bottom: none;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .hotplate-door::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    right: 4px;
+    width: 4px;
+    height: 4px;
+    background: #cc9933;
+    border-radius: 50%;
+  }
+  .game-card:hover .hotplate-door {
+    background: #7a5a3a;
+    box-shadow: 0 0 14px rgba(255,180,80,0.5);
+  }
+
+  /* ── BUILDING 3: Rabbits & Hats ── */
+  .building-rabbits {
+    width: 150px;
+    height: 170px;
+    position: relative;
+  }
+
+  /* Turrets */
+  .rabbit-turret {
+    position: absolute;
+    width: 20px;
+    height: 50px;
+    background: #664488;
+    border: 2px solid #553377;
+    z-index: 2;
+  }
+  .rabbit-turret::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -3px;
+    width: 0;
+    height: 0;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-bottom: 14px solid #775599;
+  }
+  .rabbit-turret-l { top: 20px; left: 8px; }
+  .rabbit-turret-r { top: 20px; right: 8px; }
+
+  /* Main tower */
+  .rabbit-tower {
+    position: absolute;
+    top: 10px;
+    left: 30px;
+    width: 90px;
+    height: 160px;
+    background: linear-gradient(180deg, #775599 0%, #664488 100%);
+    border: 2px solid #553377;
+    z-index: 1;
+  }
+  .rabbit-tower::before {
+    content: '';
+    position: absolute;
+    top: -16px;
+    left: -5px;
+    width: 100px;
+    height: 18px;
+    background: #886aaa;
+    border: 2px solid #553377;
+    clip-path: polygon(10% 100%, 0% 0%, 100% 0%, 90% 100%);
+  }
+
+  /* Arched windows */
+  .rabbit-window {
+    position: absolute;
+    width: 18px;
+    height: 24px;
+    background: #9966cc;
+    border: 2px solid #553377;
+    border-radius: 9px 9px 0 0;
+    box-shadow: 0 0 8px rgba(153,102,204,0.3), inset 0 0 4px rgba(153,102,204,0.2);
+    z-index: 3;
+  }
+  .rabbit-window-l { top: 80px; left: 48px; }
+  .rabbit-window-r { top: 80px; right: 48px; }
+
+  /* Door - locked */
+  .rabbit-door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 26px;
+    height: 36px;
+    background: #3a2255;
+    border: 2px solid #2a1544;
+    border-bottom: none;
+    border-radius: 13px 13px 0 0;
+    z-index: 3;
+  }
+  .rabbit-door::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 6px;
+    border: 2px solid #555;
+    border-radius: 3px;
+    background: transparent;
+  }
+
+  /* Construction tape */
+  .rabbit-tape {
+    position: absolute;
+    bottom: 10px;
+    left: 20px;
+    right: 20px;
+    height: 6px;
+    background: repeating-linear-gradient(45deg, #ffaa00 0px, #ffaa00 6px, #333 6px, #333 12px);
+    z-index: 5;
+    opacity: 0.7;
+  }
+
+  /* Sparkles */
+  .sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #cc99ff;
+    border-radius: 50%;
+    animation: sparkle-float 5s ease-in-out infinite;
+    z-index: 6;
+  }
+  .sparkle:nth-child(1) { top: 30px; left: 20px; animation-delay: 0s; }
+  .sparkle:nth-child(2) { top: 50px; right: 15px; animation-delay: 1.8s; }
+  .sparkle:nth-child(3) { top: 15px; right: 35px; animation-delay: 3.5s; }
+
+  @keyframes sparkle-float {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+    50% { opacity: 0.8; transform: translateY(-8px) scale(1); }
+  }
+
+  /* ── Pixel art sprites via box-shadow ── */
+  .pixel-sprite {
+    image-rendering: pixelated;
+  }
+
+  /* Snowflake / Ice Crystal sprite */
+  .sprite-snowflake {
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    box-shadow:
+      /* Center cross vertical */
+      20px 0px 0 #88ddff,
+      20px 4px 0 #aaeeff,
+      20px 8px 0 #88ddff,
+      20px 12px 0 #66ccee,
+      20px 16px 0 #55bbdd,
+      20px 20px 0 #88ddff,
+      20px 24px 0 #66ccee,
+      20px 28px 0 #88ddff,
+      20px 32px 0 #aaeeff,
+      20px 36px 0 #88ddff,
+      20px 40px 0 #88ddff,
+      /* Center cross horizontal */
+      0px 20px 0 #88ddff,
+      4px 20px 0 #aaeeff,
+      8px 20px 0 #88ddff,
+      12px 20px 0 #66ccee,
+      16px 20px 0 #55bbdd,
+      24px 20px 0 #55bbdd,
+      28px 20px 0 #66ccee,
+      32px 20px 0 #88ddff,
+      36px 20px 0 #aaeeff,
+      40px 20px 0 #88ddff,
+      /* Diagonal top-left to bottom-right */
+      4px 4px 0 #77ccee,
+      8px 8px 0 #88ddff,
+      12px 12px 0 #aaeeff,
+      16px 16px 0 #bbddff,
+      24px 24px 0 #bbddff,
+      28px 28px 0 #aaeeff,
+      32px 32px 0 #88ddff,
+      36px 36px 0 #77ccee,
+      /* Diagonal top-right to bottom-left */
+      36px 4px 0 #77ccee,
+      32px 8px 0 #88ddff,
+      28px 12px 0 #aaeeff,
+      24px 16px 0 #bbddff,
+      16px 24px 0 #bbddff,
+      12px 28px 0 #aaeeff,
+      8px 32px 0 #88ddff,
+      4px 36px 0 #77ccee,
+      /* Branch tips */
+      0px 4px 0 #55bbdd,
+      4px 0px 0 #55bbdd,
+      36px 0px 0 #55bbdd,
+      40px 4px 0 #55bbdd,
+      0px 36px 0 #55bbdd,
+      4px 40px 0 #55bbdd,
+      36px 40px 0 #55bbdd,
+      40px 36px 0 #55bbdd,
+      /* Side branches */
+      8px 16px 0 #99ddff,
+      12px 8px 0 #99ddff,
+      16px 12px 0 #99ddff,
+      28px 8px 0 #99ddff,
+      32px 16px 0 #99ddff,
+      24px 12px 0 #99ddff,
+      8px 24px 0 #99ddff,
+      12px 32px 0 #99ddff,
+      16px 28px 0 #99ddff,
+      28px 32px 0 #99ddff,
+      32px 24px 0 #99ddff,
+      24px 28px 0 #99ddff;
+    transform: scale(2);
+    margin: 20px auto;
+  }
+
+  /* Frying pan sprite */
+  .sprite-pan {
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    box-shadow:
+      /* Pan body - circle */
+      16px 16px 0 #555,
+      20px 16px 0 #666,
+      24px 16px 0 #666,
+      28px 16px 0 #555,
+      12px 20px 0 #555,
+      16px 20px 0 #777,
+      20px 20px 0 #888,
+      24px 20px 0 #888,
+      28px 20px 0 #777,
+      32px 20px 0 #555,
+      12px 24px 0 #555,
+      16px 24px 0 #888,
+      20px 24px 0 #999,
+      24px 24px 0 #999,
+      28px 24px 0 #888,
+      32px 24px 0 #555,
+      12px 28px 0 #555,
+      16px 28px 0 #777,
+      20px 28px 0 #888,
+      24px 28px 0 #888,
+      28px 28px 0 #777,
+      32px 28px 0 #555,
+      16px 32px 0 #555,
+      20px 32px 0 #666,
+      24px 32px 0 #666,
+      28px 32px 0 #555,
+      /* Handle */
+      36px 24px 0 #7a5a3a,
+      40px 24px 0 #8b6b4a,
+      44px 24px 0 #8b6b4a,
+      48px 24px 0 #7a5a3a,
+      52px 24px 0 #6a4a2a,
+      36px 20px 0 #6a4a2a,
+      40px 20px 0 #7a5a3a,
+      /* Flame under */
+      20px 36px 0 #ff6622,
+      24px 36px 0 #ff8833,
+      16px 40px 0 #ff4411,
+      20px 40px 0 #ffaa33,
+      24px 40px 0 #ffcc44,
+      28px 40px 0 #ff8833,
+      20px 44px 0 #ff6622,
+      24px 44px 0 #ff4411,
+      /* Flame tips */
+      16px 36px 0 #ff8833,
+      28px 36px 0 #ff6622,
+      22px 48px 0 #cc3300,
+      /* Food in pan */
+      20px 20px 0 #cc8844,
+      24px 24px 0 #ddaa55,
+      16px 24px 0 #cc9944,
+      28px 20px 0 #ddaa55;
+    transform: scale(2);
+    margin: 20px auto;
+  }
+
+  /* Rabbit in hat sprite */
+  .sprite-rabbit {
+    width: 4px;
+    height: 4px;
+    background: transparent;
+    box-shadow:
+      /* Hat brim */
+      8px 28px 0 #442266,
+      12px 28px 0 #553377,
+      16px 28px 0 #553377,
+      20px 28px 0 #553377,
+      24px 28px 0 #553377,
+      28px 28px 0 #553377,
+      32px 28px 0 #553377,
+      36px 28px 0 #442266,
+      8px 32px 0 #332255,
+      12px 32px 0 #442266,
+      16px 32px 0 #442266,
+      20px 32px 0 #442266,
+      24px 32px 0 #442266,
+      28px 32px 0 #442266,
+      32px 32px 0 #442266,
+      36px 32px 0 #332255,
+      /* Hat body */
+      12px 24px 0 #553377,
+      16px 24px 0 #664488,
+      20px 24px 0 #664488,
+      24px 24px 0 #664488,
+      28px 24px 0 #664488,
+      32px 24px 0 #553377,
+      12px 20px 0 #553377,
+      16px 20px 0 #664488,
+      20px 20px 0 #775599,
+      24px 20px 0 #775599,
+      28px 20px 0 #664488,
+      32px 20px 0 #553377,
+      12px 16px 0 #553377,
+      16px 16px 0 #664488,
+      20px 16px 0 #664488,
+      24px 16px 0 #664488,
+      28px 16px 0 #664488,
+      32px 16px 0 #553377,
+      /* Hat band */
+      12px 26px 0 #ff66aa,
+      16px 26px 0 #ff88bb,
+      20px 26px 0 #ff88bb,
+      24px 26px 0 #ff88bb,
+      28px 26px 0 #ff88bb,
+      32px 26px 0 #ff66aa,
+      /* Rabbit ears */
+      16px 0px 0 #eeddee,
+      16px 4px 0 #eeddee,
+      16px 8px 0 #eeddee,
+      20px 0px 0 #ffccdd,
+      20px 4px 0 #ffccdd,
+      20px 8px 0 #eeddee,
+      28px 0px 0 #eeddee,
+      28px 4px 0 #eeddee,
+      28px 8px 0 #eeddee,
+      24px 0px 0 #ffccdd,
+      24px 4px 0 #ffccdd,
+      24px 8px 0 #eeddee,
+      /* Rabbit head */
+      16px 12px 0 #eeddee,
+      20px 12px 0 #fff,
+      24px 12px 0 #fff,
+      28px 12px 0 #eeddee,
+      /* Eyes */
+      18px 10px 0 #222,
+      26px 10px 0 #222,
+      /* Nose */
+      22px 12px 0 #ffaacc,
+      /* Paws on hat rim */
+      12px 14px 0 #eeddee,
+      32px 14px 0 #eeddee,
+      /* Stars around */
+      4px 4px 0 #ffdd44,
+      40px 8px 0 #ffdd44,
+      8px 20px 0 #ffdd44,
+      36px 4px 0 #ffdd44;
+    transform: scale(2);
+    margin: 20px auto;
+  }
+
+  /* ── Lamppost ── */
+  .lamppost {
+    position: absolute;
+    bottom: 0;
+    z-index: 4;
+  }
+  .lamppost-left {
+    left: 60px;
+  }
+  .lamppost .pole {
+    width: 4px;
+    height: 60px;
+    background: #3a5a3a;
+    margin: 0 auto;
+  }
+  .lamppost .lamp {
+    width: 14px;
+    height: 10px;
+    background: #ffcc44;
+    border: 2px solid #3a5a3a;
+    margin: 0 auto;
+    box-shadow: 0 0 16px rgba(255,204,68,0.3);
+    position: relative;
+  }
+  .lamppost .lamp::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: -10px;
+    width: 34px;
+    height: 40px;
+    background: radial-gradient(ellipse, rgba(255,204,68,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Small tree ── */
+  .small-tree {
+    position: absolute;
+    bottom: 0;
+    right: 50px;
+    z-index: 4;
+  }
+  .tree-trunk {
+    width: 8px;
+    height: 20px;
+    background: #4a3520;
+    margin: 0 auto;
+  }
+  .tree-crown {
+    width: 30px;
+    height: 30px;
+    background: #2a5a2a;
+    border-radius: 50% 50% 4px 4px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .tree-crown::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 6px;
+    width: 18px;
+    height: 18px;
+    background: #336633;
+    border-radius: 50%;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 30px 20px 20px;
+    font-size: 10px;
+    color: #3a5a3a;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ── Scene container ── */
+  .scene-content {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-bottom: 20px;
+  }
+
+  .scene-ground {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(180deg, #1a3a1a 0%, #153015 40%, #112611 100%);
+    padding-top: 10px;
+    min-height: 60px;
+  }
+  .scene-ground::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #2a5a2a;
+  }
+
+  /* Path on ground */
+  .scene-ground .ground-path {
+    position: absolute;
+    top: 12px;
+    left: 15%;
+    right: 15%;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, #2a4a2a 0px, #2a4a2a 10px, #1e3a1e 10px, #1e3a1e 14px);
+    image-rendering: pixelated;
+  }
+
+  /* Decorative elements container */
+  .scene-decorations {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .games {
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    header h1 {
+      font-size: 24px;
+    }
+    .sky {
+      height: 200px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>FLY AGILE GAMES</h1>
+    <p>Des jeux collaboratifs pour vos equipes</p>
+  </header>
+
+  <!-- Sky background -->
+  <div class="scene-wrapper">
+    <div class="sky">
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <!-- Clouds -->
+      <div class="cloud"></div>
+      <div class="cloud"></div>
+    </div>
+  </div>
+
+  <!-- Main scene -->
+  <div class="scene-content">
+    <!-- Sky gradient behind buildings -->
+    <div style="
+      position: absolute;
+      top: -200px;
+      left: 0;
+      right: 0;
+      height: 500px;
+      background: linear-gradient(180deg, #0d180d 0%, #162016 25%, #1a2e1a 55%, #1f3a1f 100%);
+      z-index: 0;
+      overflow: hidden;
+    ">
+      <!-- Stars -->
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:30px;left:10%;animation:twinkle 4s ease-in-out infinite;"></div>
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:50px;left:25%;animation:twinkle 4s ease-in-out infinite;animation-delay:1s;"></div>
+      <div style="position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;top:20px;left:42%;animation:twinkle 4s ease-in-out infinite;animation-delay:2.3s;"></div>
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:60px;left:58%;animation:twinkle 4s ease-in-out infinite;animation-delay:0.7s;"></div>
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:15px;left:70%;animation:twinkle 4s ease-in-out infinite;animation-delay:1.6s;"></div>
+      <div style="position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;top:45px;left:82%;animation:twinkle 4s ease-in-out infinite;animation-delay:3s;"></div>
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:35px;left:92%;animation:twinkle 4s ease-in-out infinite;animation-delay:0.2s;"></div>
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:70px;left:5%;animation:twinkle 4s ease-in-out infinite;animation-delay:2.7s;"></div>
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:80px;left:35%;animation:twinkle 4s ease-in-out infinite;animation-delay:1.3s;"></div>
+      <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:90px;left:65%;animation:twinkle 4s ease-in-out infinite;animation-delay:3.5s;"></div>
+      <!-- Clouds -->
+      <div style="position:absolute;width:80px;height:18px;background:rgba(255,255,255,0.035);border-radius:10px;top:55px;animation:drift 75s linear infinite;"></div>
+      <div style="position:absolute;width:60px;height:14px;background:rgba(255,255,255,0.025);border-radius:8px;top:85px;animation:drift 90s linear infinite;animation-delay:-40s;"></div>
+    </div>
+
+    <!-- Buildings row -->
+    <div class="games" style="padding-top: 200px;">
+
+      <!-- La Chambre Froide -->
+      <a href="https://chambre-froide.flyagile.com" class="game-card">
+        <div class="building-wrap">
+          <div class="building-froide">
+            <div class="froide-snow"></div>
+            <div class="froide-roof"></div>
+            <div class="froide-icicles">
+              <div class="icicle"></div>
+              <div class="icicle"></div>
+              <div class="icicle"></div>
+              <div class="icicle"></div>
+              <div class="icicle"></div>
+              <div class="icicle"></div>
+              <div class="icicle"></div>
+            </div>
+            <div class="froide-walls">
+              <div class="froide-window froide-window-l"></div>
+              <div class="froide-window froide-window-r"></div>
+              <div class="froide-door"></div>
+            </div>
+          </div>
+        </div>
+        <div class="game-info">
+          <div class="sprite-container">
+            <div class="sprite-snowflake pixel-sprite"></div>
+          </div>
+          <div class="game-name">La Chambre Froide</div>
+          <div class="game-desc">Puzzle mathematique</div>
+          <div class="status">
+            <span class="status-dot"></span>
+            <span class="status-live">LIVE</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Hotplate -->
+      <a href="https://hotplate.flyagile.com" class="game-card">
+        <div class="building-wrap">
+          <div class="building-hotplate">
+            <div class="smoke-particle"></div>
+            <div class="smoke-particle"></div>
+            <div class="smoke-particle"></div>
+            <div class="hotplate-chimney"></div>
+            <div class="hotplate-awning"></div>
+            <div class="hotplate-walls">
+              <div class="hotplate-sign">OPEN</div>
+              <div class="hotplate-window hotplate-window-l"></div>
+              <div class="hotplate-window hotplate-window-r"></div>
+              <div class="hotplate-door"></div>
+            </div>
+          </div>
+        </div>
+        <div class="game-info">
+          <div class="sprite-container">
+            <div class="sprite-pan pixel-sprite"></div>
+          </div>
+          <div class="game-name">Hotplate</div>
+          <div class="game-desc">Cuisine collaborative</div>
+          <div class="status">
+            <span class="status-dot"></span>
+            <span class="status-live">LIVE</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Rabbits & Hats -->
+      <div class="game-card disabled">
+        <div class="building-wrap">
+          <div class="building-rabbits">
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="rabbit-turret rabbit-turret-l"></div>
+            <div class="rabbit-turret rabbit-turret-r"></div>
+            <div class="rabbit-tower">
+              <div class="rabbit-window rabbit-window-l"></div>
+              <div class="rabbit-window rabbit-window-r"></div>
+              <div class="rabbit-door"></div>
+            </div>
+            <div class="rabbit-tape"></div>
+          </div>
+        </div>
+        <div class="game-info">
+          <div class="sprite-container">
+            <div class="sprite-rabbit pixel-sprite"></div>
+          </div>
+          <div class="game-name">Rabbits &amp; Hats</div>
+          <div class="game-desc">Strategie multijoueur</div>
+          <div class="status">
+            <span class="status-soon">COMING SOON</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ground -->
+    <div class="scene-ground">
+      <div class="ground-path"></div>
+      <!-- Lamppost -->
+      <div style="position:absolute;left:80px;bottom:10px;z-index:4;">
+        <div style="width:14px;height:10px;background:#ffcc44;border:2px solid #3a5a3a;margin:0 auto;box-shadow:0 0 16px rgba(255,204,68,0.25);"></div>
+        <div style="width:4px;height:50px;background:#3a5a3a;margin:0 auto;"></div>
+      </div>
+      <!-- Small tree -->
+      <div style="position:absolute;right:70px;bottom:10px;z-index:4;">
+        <div style="width:26px;height:26px;background:#2a5a2a;border-radius:50% 50% 4px 4px;margin:0 auto;position:relative;">
+          <div style="position:absolute;top:-8px;left:5px;width:16px;height:16px;background:#336633;border-radius:50%;"></div>
+        </div>
+        <div style="width:6px;height:16px;background:#4a3520;margin:0 auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Fly Agile
+  </footer>
+</div>
+</body>
+</html>
