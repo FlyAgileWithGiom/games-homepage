@@ -8,13 +8,27 @@ Single-page static homepage acting as visual portal to Fly Agile's collaborative
 - **Framing**: `planning/framing.md`
 - **Backlog**: `planning/backlog.md` (source of truth is GitLab Issues)
 - **Prototypes**: `prototypes/` (exploration artifacts, NOT production code)
+- **Production base**: Prototype I2 (chosen after 15+ iterations)
 
 ## Tech Stack
 - Pure static: HTML + CSS + vanilla JS
 - No build pipeline (may evolve to Vite if needed)
 - Pixel art: CSS box-shadow technique, image-rendering: pixelated
 - Font: Google Fonts "Silkscreen"
-- Hosting: Scaleway (same as existing games)
+- Deployment: Scaleway Serverless Containers (nginx:alpine)
+- CI/CD: GitLab CI, deploys on version tags (v*)
+
+## Project Structure
+```
+index.html          # Production homepage
+css/style.css       # All styles (night scene, buildings, animations)
+js/main.js          # Star generation script
+Dockerfile          # nginx:alpine static serving
+.gitlab-ci.yml      # Tag-gated Scaleway deployment
+deploy-scaleway.sh  # Manual deployment script
+prototypes/         # All visual explorations (A through I2)
+planning/           # Framing + backlog docs
+```
 
 ## Art Direction (Homepage)
 
@@ -60,16 +74,26 @@ Each game keeps its own identity and can evolve independently. The homepage has 
 - Terminal/CRT (too niche for coaches, Prototype D)
 - Adventure map top-down (zones too abstract, Prototype E3)
 
-## Games
-| Game | Status | URL | Homepage Color |
-|------|--------|-----|---------------|
-| La Chambre Froide | LIVE | https://chambre-froide.flyagile.com | Cyan/blue |
-| Hotplate | LIVE | https://hotplate.flyagile.com | Amber/orange |
+## Games & URL Routing
+Games are served under the homepage domain with path-based routing:
+
+| Game | Status | Path | Homepage Color |
+|------|--------|------|---------------|
+| La Chambre Froide | LIVE (needs redeployment) | /frozen-chamber | Cyan/blue |
+| Hotplate | LIVE | /hotplate | Amber/orange |
 | Rabbits & Hats | COMING SOON | TBD | Purple/pink |
+
+## Infrastructure
+- **Hosting**: Scaleway Serverless Containers
+- **Existing games**: Also on Scaleway Serverless Containers (separate containers)
+- **K3s cluster**: Exists for MCP services (mcp.fly-agile.com), NOT for games currently
+- **Future**: Path-based routing may require ingress consolidation if games move to K3s
+- **Domain**: TBD (see GitLab issue #12)
+- **Target**: sub-2s load on 4G
 
 ## Access Model
 - Invitation-only: games require an invitation to join
-- Homepage displays "Invitation required — Contact Giom" discretely
+- Homepage displays "Invitation required -- Contact Giom" discretely
 - The page is public but games are gated
 
 ## Language
@@ -80,11 +104,6 @@ Each game keeps its own identity and can evolve independently. The homepage has 
 - Agile coaches sharing one URL with workshop participants
 - Coaches are tech-curious, participants are NOT tech-oriented
 - The page must work without explanation: land, see, click, play
-
-## Deployment
-- Scaleway (matching existing games infra)
-- Domain: TBD (see GitLab issue #12)
-- Target: sub-2s load on 4G
 
 ## Commit Standards
 Follow Fly Agile conventions:
