@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fly Agile Games</title>
+  <meta name="description" content="Collaborative workshop games for agile teams by Fly Agile. Explore La Chambre Froide, Hotplate, and more.">
+  <meta name="theme-color" content="#1a1a3e">
+  <link rel="canonical" href="https://games.flyagile.com">
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="scene">
+  <!-- Sky -->
+  <div class="sky" id="sky">
+    <!-- Moon -->
+    <div class="moon">
+      <div class="moon-body">
+        <div class="moon-crater"></div>
+        <div class="moon-crater"></div>
+        <div class="moon-crater"></div>
+      </div>
+    </div>
+
+    <!-- Clouds -->
+    <div class="cloud cloud-1">
+      <div class="cloud-pixel" style="left:0;top:8px"></div>
+      <div class="cloud-pixel" style="left:8px;top:8px"></div>
+      <div class="cloud-pixel" style="left:16px;top:0"></div>
+      <div class="cloud-pixel" style="left:24px;top:0"></div>
+      <div class="cloud-pixel" style="left:32px;top:0"></div>
+      <div class="cloud-pixel" style="left:16px;top:8px"></div>
+      <div class="cloud-pixel" style="left:24px;top:8px"></div>
+      <div class="cloud-pixel" style="left:32px;top:8px"></div>
+      <div class="cloud-pixel" style="left:40px;top:8px"></div>
+      <div class="cloud-pixel" style="left:48px;top:8px"></div>
+    </div>
+    <div class="cloud cloud-2">
+      <div class="cloud-pixel" style="left:0;top:8px"></div>
+      <div class="cloud-pixel" style="left:8px;top:0"></div>
+      <div class="cloud-pixel" style="left:16px;top:0"></div>
+      <div class="cloud-pixel" style="left:24px;top:0"></div>
+      <div class="cloud-pixel" style="left:8px;top:8px"></div>
+      <div class="cloud-pixel" style="left:16px;top:8px"></div>
+      <div class="cloud-pixel" style="left:24px;top:8px"></div>
+      <div class="cloud-pixel" style="left:32px;top:8px"></div>
+    </div>
+  </div>
+
+  <!-- Ground -->
+  <div class="ground">
+    <div class="ground-grass"></div>
+    <div class="ground-texture"></div>
+    <div class="ground-path"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>FLY AGILE GAMES</h1>
+    <div class="subtitle">Collaborative games for your teams</div>
+    <div class="invitation-note">Invitation required — Contact Giom</div>
+  </div>
+
+  <!-- Village -->
+  <div class="village">
+
+    <!-- La Chambre Froide -->
+    <a href="/frozen-chamber" class="building-slot">
+      <div class="building-cf">
+        <div class="cf-snow"></div>
+        <div class="cf-roof"></div>
+        <div class="cf-icicles">
+          <div class="icicle"></div>
+          <div class="icicle"></div>
+          <div class="icicle"></div>
+          <div class="icicle"></div>
+          <div class="icicle"></div>
+          <div class="icicle"></div>
+        </div>
+        <div class="cf-walls">
+          <div class="cf-frost"></div>
+          <div class="cf-frost"></div>
+          <div class="cf-frost"></div>
+          <div class="cf-window cf-window-l"></div>
+          <div class="cf-window cf-window-r"></div>
+          <div class="cf-door"></div>
+        </div>
+        <div class="cf-sprite-glow"></div>
+        <div class="cf-sprite"></div>
+      </div>
+      <div class="signpost">
+        <div class="signpost-pole"></div>
+        <div class="signpost-plank">
+          <div class="signpost-name">La Chambre Froide</div>
+          <div class="signpost-desc">Math puzzle</div>
+        </div>
+        <div class="signpost-status">
+          <div class="status-dot live"></div>
+          <span class="status-text live">LIVE</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- Hotplate -->
+    <a href="/hotplate" class="building-slot">
+      <div class="building-hp">
+        <div class="hp-chimney">
+          <div class="hp-chimney-cap"></div>
+          <div class="smoke-particle"></div>
+          <div class="smoke-particle"></div>
+          <div class="smoke-particle"></div>
+        </div>
+        <div class="hp-roof"></div>
+        <div class="hp-awning"></div>
+        <div class="hp-walls">
+          <div class="hp-window hp-window-l"></div>
+          <div class="hp-window hp-window-r"></div>
+          <div class="hp-door">
+            <div class="hp-door-knob"></div>
+          </div>
+          <div class="hp-open-sign"><span>OPEN</span></div>
+        </div>
+        <div class="hp-sprite-glow"></div>
+        <div class="hp-sprite"></div>
+      </div>
+      <div class="signpost">
+        <div class="signpost-pole"></div>
+        <div class="signpost-plank">
+          <div class="signpost-name">Hotplate</div>
+          <div class="signpost-desc">Collaborative cooking</div>
+        </div>
+        <div class="signpost-status">
+          <div class="status-dot live"></div>
+          <span class="status-text live">LIVE</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- Rabbits & Hats -->
+    <div class="building-slot disabled">
+      <div class="building-rh">
+        <div class="rh-turret rh-turret-l">
+          <div class="rh-turret-cap"></div>
+          <div class="rh-turret-body"></div>
+        </div>
+        <div class="rh-turret rh-turret-r">
+          <div class="rh-turret-cap"></div>
+          <div class="rh-turret-body"></div>
+        </div>
+        <div class="rh-battlements">
+          <div class="battlement"></div>
+          <div class="battlement"></div>
+          <div class="battlement"></div>
+          <div class="battlement"></div>
+          <div class="battlement"></div>
+          <div class="battlement"></div>
+          <div class="battlement"></div>
+        </div>
+        <div class="rh-walls">
+          <div class="rh-window"></div>
+          <div class="rh-door">
+            <div class="rh-lock"></div>
+          </div>
+          <div class="rh-tape"></div>
+        </div>
+        <div class="rh-sprite-glow"></div>
+        <div class="rh-sprite"></div>
+        <div class="sparkle sparkle-1"></div>
+        <div class="sparkle sparkle-2"></div>
+        <div class="sparkle sparkle-3"></div>
+      </div>
+      <div class="signpost">
+        <div class="signpost-pole"></div>
+        <div class="signpost-plank">
+          <div class="signpost-name">Rabbits &amp; Hats</div>
+          <div class="signpost-desc">Multiplayer strategy</div>
+        </div>
+        <div class="signpost-status">
+          <div class="status-dot soon"></div>
+          <span class="status-text soon">COMING SOON</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">&copy; 2026 Fly Agile</div>
+
+<script src="js/main.js"></script>
+
+</body>
+</html>
