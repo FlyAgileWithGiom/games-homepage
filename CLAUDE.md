@@ -75,15 +75,16 @@ Each game keeps its own identity and can evolve independently. The homepage has 
 - Adventure map top-down (zones too abstract, Prototype E3)
 
 ## Games & URL Routing
-Two domains:
-- **games.fly-agile.com** = homepage (this project)
-- **play.fly-agile.com** = direct game access
+Single domain: **play.fly-agile.com**
+- `/` = homepage (this project)
+- `/hotplate` = Hotplate game
+- `/frozen-chamber` = La Chambre Froide
 
 | Game | Status | URL | Homepage Color |
 |------|--------|-----|---------------|
 | La Chambre Froide | Needs redeployment | play.fly-agile.com/frozen-chamber | Cyan/blue |
-| Hotplate | LIVE on K3s | play.fly-agile.com | Amber/orange |
-| Rabbits & Hats | COMING SOON | TBD | Purple/pink |
+| Hotplate | LIVE on K3s | play.fly-agile.com/hotplate | Amber/orange |
+| Rabbits & Hats | LIVE on K3s | play.fly-agile.com/rabbits-hats | Purple/pink |
 
 ## Infrastructure
 - **Hosting**: K3s cluster on Scaleway Kapsule (ArgoCD GitOps)
@@ -92,7 +93,7 @@ Two domains:
 - **ArgoCD app**: `argocd/games-homepage-prod.yaml`
 - **Ingress**: nginx-ingress + cert-manager (letsencrypt-prod)
 - **Registry**: rg.fr-par.scw.cloud/fly-agile-prod/games-homepage
-- **DNS**: PlanetHoster (games.fly-agile.com → 51.159.25.216)
+- **DNS**: PlanetHoster (play.fly-agile.com → 51.159.25.216)
 - **Target**: sub-2s load on 4G
 
 ## Access Model
