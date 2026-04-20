@@ -3,10 +3,10 @@
 ## Project
 Single-page static homepage acting as visual portal to Fly Agile's collaborative workshop games. Pixel art night village where each building IS a game.
 
-- **Repo**: https://gitlab.com/flyagile/games-homepage
-- **Issues**: GitLab Issues (labels: setup, scene, interaction, branding, responsive, deployment, MVP, post-MVP)
+- **Repo**: https://github.com/FlyAgileWithGiom/games-homepage
+- **Issues**: GitHub Issues (labels: setup, scene, interaction, branding, responsive, deployment, MVP, post-MVP)
 - **Framing**: `planning/framing.md`
-- **Backlog**: `planning/backlog.md` (source of truth is GitLab Issues)
+- **Backlog**: `planning/backlog.md` (source of truth is GitHub Issues)
 - **Prototypes**: `prototypes/` (exploration artifacts, NOT production code)
 - **Production base**: Prototype I2 (chosen after 15+ iterations)
 
@@ -15,19 +15,18 @@ Single-page static homepage acting as visual portal to Fly Agile's collaborative
 - No build pipeline (may evolve to Vite if needed)
 - Pixel art: CSS box-shadow technique, image-rendering: pixelated
 - Font: Google Fonts "Silkscreen"
-- Deployment: Scaleway Serverless Containers (nginx:alpine)
-- CI/CD: GitLab CI, deploys on version tags (v*)
+- Deployment: K3s cluster on Scaleway Kapsule via ArgoCD (nginx:alpine)
+- CI/CD: GitHub Actions, builds on push to main and tags (v*), triggers K8s updates
 
 ## Project Structure
 ```
-index.html          # Production homepage
-css/style.css       # All styles (night scene, buildings, animations)
-js/main.js          # Star generation script
-Dockerfile          # nginx:alpine static serving
-.gitlab-ci.yml      # Tag-gated Scaleway deployment
-deploy-scaleway.sh  # Manual deployment script
-prototypes/         # All visual explorations (A through I2)
-planning/           # Framing + backlog docs
+index.html                    # Production homepage
+css/style.css                 # All styles (night scene, buildings, animations)
+js/main.js                    # Star generation script
+Dockerfile                    # nginx:alpine static serving
+.github/workflows/ci.yml      # GitHub Actions CI/CD pipeline
+prototypes/                   # All visual explorations (A through I2)
+planning/                     # Framing + backlog docs
 ```
 
 ## Art Direction (Homepage)
@@ -41,7 +40,7 @@ planning/           # Framing + backlog docs
 ### Fly Agile Brand Integration
 - Green (#4CAF50) as ACCENT only: grass, status badges, subtitle, hover effects
 - Brand green is NOT the sky/background color
-- Logo placement: TBD (see GitLab issue #10)
+- Logo placement: TBD (see GitHub issue #10)
 
 ### Animations (CALM is the rule)
 - Stars: 4-7s twinkle, staggered delays
